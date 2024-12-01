@@ -5,6 +5,7 @@ const path = require('path');
 const puppeteer = require('puppeteer')
 const app = express();
 const PORT = process.env.PORT || 5000;
+
 require('dotenv').config();
 //  login.htmlに遷移
 app.get('/',(req,res)=>{
@@ -73,5 +74,3 @@ app.use(express.static('public'));
 
 
 app.listen(PORT,()=>{console.log(`http://localhost:${PORT}`)})
-
-//aaa
