@@ -9,6 +9,7 @@
   <title>Bootstrap Demo</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script type="module" src="./firebaseauth.js"></script>
 </head>
 
 <body class="d-flex flex-column justify-content-center align-items-center vh-100">
@@ -54,40 +55,36 @@
   </script>
   <!-- 　Firebase JavaScript SDK -->
   <div class="container w-75 d-flex flex-column align-items-center">
-    <h1 class="text-center">コンビニトレンド</h1>
-    <div class="mb-3 w-50">
-      <!-- labelタグのfor属性値は　for="emailInput" 
-    テキスト内容は　メールアドレス-->
-      <label for="exampleFormControlInput1" class="form-label">
-        Email address
-        <!-- テキストの右隣に"必須"の赤いバッジ追加詳細は下記のURL参照 -->
-        <!-- https://getbootstrap.jp/docs/5.3/components/badge/ -->
-      </label>
-
-      <!-- inputタグid属性値id="emailInput"
-     placeholder="例: name@example.com"-->
-      <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
-    </div>
-    <div class="mb-3 w-50">
-      <!-- labelタグの for属性値は for="inputPassword" テキストの内容は　パスワード-->
-      <label for="inputPassword5" class="form-label">Password
-        <!-- テキストの右隣に"必須"の赤いバッジ追加詳細は下記のURL参照 -->
-        <!-- https://getbootstrap.jp/docs/5.3/components/badge/ -->
-      </label>
-      <!-- inputタグのid属性値は="inputPassword"-->
-      <input type="password" id="inputPassword5" class="form-control" aria-labelledby="passwordHelpBlock">
-    </div>
-
-
-    <div class="col-auto">
-      <!-- ログインボタンのテキスト内容は　「ログイン」 -->
-      <button type="submit" class="btn btn-primary mb-3">Confirm identity</button>
-    </div>
+    <!-- <form method="post" action=""> -->
+      <h1 class="text-center">コンビニトレンド</h1>
+      <div class="mb-3 w-50">
+        <!-- labelタグのfor属性値は　for="signinEmail"  テキスト内容は　メールアドレス-->
+        <label for="signinEmail" class="form-label">
+          Email address
+          <!-- テキストの右隣に"必須"の赤いバッジ追加詳細は下記のURL参照 -->
+          <!-- https://getbootstrap.jp/docs/5.3/components/badge/ -->
+        </label>
+        <!-- inputタグid属性値id="signinEmail" placeholder="例: name@example.com"-->
+        <input type="email" class="form-control" id="signinEmail" placeholder="name@example.com">
+      </div>
+      <div class="mb-3 w-50">
+        <!-- labelタグの for属性値は for="signinPassword" テキストの内容は　パスワード-->
+        <label for="signinPassword" class="form-label">Password 
+          <!-- テキストの右隣に"必須"の赤いバッジ追加詳細は下記のURL参照 -->
+          <!-- https://getbootstrap.jp/docs/5.3/components/badge/ -->
+        </label>
+        <!-- inputタグのid属性値は="signinPassword" placeholder="例: example"-->
+        <input type="password" id="signinPassword" class="form-control" aria-labelledby="passwordHelpBlock"placeholder="name@example.com">
+      </div>
+      <div class="col-auto">
+        <!-- ログインボタンのテキスト内容は　ログインする -->
+        <button  class="btn btn-primary mb-3" id="submitSignin">ログインする</button>
+      </div>
+    <!-- </form> -->
   </div>
   <!-- id属性がfirebaseui-auth-containerに対して認証付きボタン機能が適応される -->
   <!-- Googleでログインボタンを移動させる場合は、以下のdiv idタグを切り取ってください -->
   <div id="firebaseui-auth-container"></div>
   <a href="./signup.html">ユーザー登録</a>
 </body>
-
 </html>

@@ -9,6 +9,7 @@ const puppeteer = require('puppeteer')
 //  セブンイレブンの各商品情報の要素
 const elements = '.pbNested> div > div.list_inner';
 
+
 (async () => {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
