@@ -63,3 +63,56 @@ body{
     background-color: #007bff; /* 背景を青に */
     color: #fff; /* テキストを白に */
 }
+
+.head-border {
+    display: flex;
+    align-items: center;
+    font-size: 1rem; /* 文字のサイズを小さくする */
+    color: #b3adad; /* 文字の色を#b3adadに変更 */
+    margin-top: 1rem; /* 上にスペースを追加 */
+    margin-bottom: 1rem; /* 下にスペースを追加 */
+}
+
+.head-border:before,
+.head-border:after {
+    content: "";
+    height: 1px;
+    flex-grow: 1;
+    background-color: #b3adad; /* 区切り線の色を#b3adadに変更 */
+    color: #b3adad;
+}
+
+.head-border:before {
+    margin-right: 1rem;
+}
+
+.head-border:after {
+    margin-left: 1rem;
+}
+
+.banner {
+    background-color: #f8f9fa;
+    padding: 20px 0;
+    text-align: center;
+  }
+
+  /* プルダウンメニューの配置 */
+  .dropdown-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn-group {
+    width: 200px; /* ボタンの幅を指定 */
+  }
+
+  .dropdown-item {
+    white-space: nowrap; /* 長いテキストが折り返されないように */
+  }
+
+  .form-label.required::after {
+    content: " 必須";
+    color: red;
+    margin-left: 5px;
+  }
