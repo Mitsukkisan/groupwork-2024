@@ -1,0 +1,38 @@
+.card {
+    border: 1px solid #ddd; /* カードの境界に薄いグレーの線を追加 */
+    border-radius: 8px; /* カードの角を少し丸くする */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* ソフトな影を追加 */
+    transition: transform 0.3s, box-shadow 0.3s; /* ホバー時のアニメーションを設定 */
+    padding: 16px; /* 内側の余白を設定 */
+    background-color: #fff; /* 背景色を白に設定 */
+    max-width: 720px; /* カードの最大幅を設定 */
+    margin: 16px auto; /* 上下左右中央揃えにする */
+    display: flex; /* フレックスボックスを使って子要素を配置 */
+    flex-direction: column; /* 子要素を縦に並べる */
+    align-items: center; /* 子要素を中央揃えにする */
+    margin-top: 150px;
+}
+/* ランキング画像のスタイル */
+.ranking-img {
+    position: absolute; /* 親要素に対して絶対位置を設定 */
+    top: -35%; /* 上からの距離 */
+    left: 50%; /* 水平方向で中央揃え */
+    transform: translateX(-50%); /* 中央揃えのために要素の幅の半分を調整 */
+    width: 250px; /* ランキング画像の幅を指定 */
+    z-index: 10; /* 商品画像より前面に表示 */
+}
+/* レスポンシブ対応: 画面幅が768px以下の場合 */
+@media (max-width: 768px) {
+    .ranking-img {
+        top: -40%; /* 上の距離を縮める */
+        width: 200px; /* ランキング画像の幅を縮小 */
+    }
+}
+
+/* レスポンシブ対応: 画面幅が576px以下の場合 */
+@media (max-width: 576px) {
+    .ranking-img {
+        top: -50%; /* 上の距離をさらに縮める */
+        width: 180px; /* ランキング画像をさらに小さくする */
+    }
+}

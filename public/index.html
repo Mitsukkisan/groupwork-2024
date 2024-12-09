@@ -11,6 +11,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <script type="module" src="./firebaseauth.js"></script>
+    <link href="./style.css" rel="stylesheet">
+</head>
 
 </head>
 <body class="d-flex flex-column justify-content-center align-items-center vh-100">
@@ -54,38 +56,43 @@
       ui.start('#firebaseui-auth-container', uiConfig);
     });
   </script>
-  <!-- 　Firebase JavaScript SDK -->
-  <div class="container w-75 d-flex flex-column align-items-center">
-    <!-- <form method="post" action=""> -->
-      <h1 class="text-center">コンビニトレンド</h1>
-      <div class="mb-3 w-50">
-        <!-- labelタグのfor属性値は　for="signinEmail"  テキスト内容は　メールアドレス-->
-        <label for="signinEmail" class="form-label">
-          Email address
-          <!-- テキストの右隣に"必須"の赤いバッジ追加詳細は下記のURL参照 -->
-          <!-- https://getbootstrap.jp/docs/5.3/components/badge/ -->
-        </label>
-        <!-- inputタグid属性値id="signinEmail" placeholder="例: name@example.com"-->
-        <input type="email" class="form-control" id="signinEmail" placeholder="name@example.com">
-      </div>
-      <div class="mb-3 w-50">
-        <!-- labelタグの for属性値は for="signinPassword" テキストの内容は　パスワード-->
-        <label for="signinPassword" class="form-label">Password 
-          <!-- テキストの右隣に"必須"の赤いバッジ追加詳細は下記のURL参照 -->
-          <!-- https://getbootstrap.jp/docs/5.3/components/badge/ -->
-        </label>
-        <!-- inputタグのid属性値は="signinPassword" placeholder="例: example"-->
-        <input type="password" id="signinPassword" class="form-control" aria-labelledby="passwordHelpBlock"placeholder="name@example.com">
-      </div>
-      <div class="col-auto">
-        <!-- ログインボタンのテキスト内容は　ログインする -->
-        <button  class="btn btn-primary mb-3" id="submitSignin">ログインする</button>
-      </div>
-    <!-- </form> -->
+  <div class="d-flex align-items-center justify-content-center vh-100">
+    <div class="card p-3" style="width: 30rem;">
+        <!-- action属性にエンドポイント先URLを指定 -->
+        <form method="post" action="">
+            <h2 class="text-center">コンビニトレンド</h2>
+            <div class="mb-3">
+                <label for="signupEmail" class="form-label">メールアドレス<span
+                        class="badge bg-danger ms-1">必須</span></label>
+                <input type="email" class="form-control" id="signupEmail"placeholder="例: example@mail.com" required>
+            </div>
+            <div class=" mb-3">
+                <label for="signupPassword" class="form-label">パスワード<span
+                        class="badge bg-danger ms-1">必須</span></label>
+                <input type="password" id="signupPassword" class="form-control"placeholder="例: example" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary text-center" id="submitSignup"><svg xmlns="http://www.w3.org/2000/svg"
+                        width="16" height="15" fill="currentColor" class="bi bi-send me-1" viewBox="0 0 16 16">
+                        <path
+                            d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z" />
+                    </svg>ログイン</button>
+            </div>
+            <h2 class="head-border">または</h2>
+            <div id="firebaseui-auth-container"></div>
+            <a href="./signup.html"></a>
+            <h2 class="head-border">ユーザー登録がお済みでない方</h2>
+            <div class="text-center">
+            <button type="submit" class="btn btn-primary text-center" id="submitSignup">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-plus" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7"/>
+                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/>
+                <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/>
+              </svg>     ユーザー登録</button></div>
+        </form>      
+    </div>
   </div>
   <!-- id属性がfirebaseui-auth-containerに対して認証付きボタン機能が適応される -->
   <!-- Googleでログインボタンを移動させる場合は、以下のdiv idタグを切り取ってください -->
-  <div id="firebaseui-auth-container"></div>
-  <a href="./signup.html">ユーザー登録</a>
 </body>
 </html>
