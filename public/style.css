@@ -1,65 +1,81 @@
-body{
-    background-color: #B5D4F3;
+/* ページ全体の背景色とフォント設定 */
+body {
+    background-color: #B5D4F3; /* 背景色を淡い青色に */
+    margin: 0; /* ページ全体の余白をリセット */
+    font-family: Arial, sans-serif; /* 読みやすいサンセリフフォントを指定 */
 }
+
 /* カード全体のスタイル */
 .card {
-    border: 1px solid #ddd; /* 薄いグレーのボーダー */
-    border-radius: 8px; /* 角を丸くする */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* さりげない影 */
-    overflow: hidden; /* コンテンツがはみ出さないようにする */
-    transition: transform 0.3s, box-shadow 0.3s; /* トランジション効果 */
-    padding: 16px; /* 内側の余白 */
-    background-color: #fff; /* 背景色を白に */
+    border: 1px solid #ddd; /* カードの境界に薄いグレーの線を追加 */
+    border-radius: 8px; /* カードの角を少し丸くする */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* ソフトな影を追加 */
+    transition: transform 0.3s, box-shadow 0.3s; /* ホバー時のアニメーションを設定 */
+    padding: 16px; /* 内側の余白を設定 */
+    background-color: #fff; /* 背景色を白に設定 */
+    margin: 16px auto; /* 上下左右中央揃えにする */
+    display: flex; /* フレックスボックスを使って子要素を配置 */
 }
 
-/* ホバー効果 */
+/* カードのホバー時の効果 */
 .card:hover {
-    transform: translateY(-5px); /* 少し持ち上げる */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* 影を強調 */
+    transform: translateY(-5px); /* カードを少し持ち上げる */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* ホバー時に影を強調 */
 }
 
-/* カード内の画像 */
-.card-img-top {
-    width: 100%; /* 幅を親要素に合わせる */
+/* 画像をラップする親要素の設定 */
+.image-wrapper {
+    position: relative; /* 子要素（ランキング画像）を絶対位置で配置可能に */
+    width: 100%; /* 親要素の幅いっぱいに設定 */
+    
+}
+
+
+
+/* 商品画像のスタイル */
+.product-img {
+    width: 100%; /* カード幅いっぱいに画像を表示 */
     border-radius: 4px; /* 画像の角を少し丸くする */
-    margin-bottom: 12px; /* 下部の余白 */
 }
 
-/* カードのタイトル */
+/* カード内のタイトルスタイル */
 .card-title {
-    font-size: 1.25rem; /* タイトルを少し大きく */
-    font-weight: bold; /* 太字 */
-    margin-bottom: 8px; /* 下部の余白 */
+    font-size: 1.25rem; /* タイトルのフォントサイズを大きく設定 */
+    font-weight: bold; /* タイトルを太字に */
+    text-align: center; /* テキストを中央揃えに */
+    margin-bottom: 8px; /* タイトルの下に余白を追加 */
 }
 
-/* カード内のテキスト */
+/* カード内のテキストスタイル */
 .card-text {
-    margin-bottom: 8px; /* 各テキスト間の余白 */
-    font-size: 0.9rem; /* 少し小さめのフォント */
+    margin-bottom: 8px; /* テキスト間に余白を追加 */
+    font-size: 0.9rem; /* テキストを少し小さめに設定 */
     color: #555; /* テキスト色を落ち着いたグレーに */
 }
 
-/* いいねボタンのSVGとテキスト */
-.card .bi-hand-thumbs-up {
-    margin-right: 8px; /* アイコンとテキスト間の間隔 */
-    vertical-align: middle; /* テキストとアイコンを中央揃え */
-}
-
-/* ボタン */
+/* いいねボタンのスタイル */
 .btn {
-    display: inline-block; /* インライン要素として扱う */
-    padding: 8px 12px; /* ボタン内の余白 */
-    font-size: 0.9rem; /* フォントサイズ */
-    border-radius: 4px; /* 角を丸く */
-    border: 1px solid #007bff; /* ボーダー */
-    background-color: #fff; /* 背景は白 */
-    color: #007bff; /* テキストは青 */
-    transition: background-color 0.3s, color 0.3s; /* トランジション */
-    cursor: pointer; /* ポインターを表示 */
+    display: inline-block; /* インライン要素として表示 */
+    padding: 8px 12px; /* ボタン内の余白を設定 */
+    font-size: 0.9rem; /* フォントサイズを設定 */
+    border-radius: 4px; /* ボタンの角を丸く設定 */
+    border: 1px solid #007bff; /* 青いボーダーを追加 */
+    background-color: #fff; /* 背景色を白に設定 */
+    color: #007bff; /* テキストを青色に */
+    transition: background-color 0.3s, color 0.3s; /* ホバー時のトランジションを設定 */
+    cursor: pointer; /* ホバー時にポインタを表示 */
+    margin-top: 8px; /* ボタン上部に余白を追加 */
 }
 
-/* ボタンのホバー効果 */
+/* いいねボタンのホバー時の効果 */
 .btn:hover {
-    background-color: #007bff; /* 背景を青に */
-    color: #fff; /* テキストを白に */
+    background-color: #007bff; /* ボタンの背景色を青に変更 */
+    color: #fff; /* テキストを白に変更 */
+}
+
+/* クリック後の状態を保持するためのクラス */
+.btn.active {
+    background-color: #689f3e; /* アクティブ時の背景色 */
+    color: #fff;
+    border-color: #a9ff68; /* ボーダーもホバー色に一致させる */
 }
