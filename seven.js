@@ -11,9 +11,9 @@ require('dotenv').config();
 //  サービスアカウントファイル
 const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 // ADMIN SDK初期化
-const firebaseApp =admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'conveni-trend.firebasestorage.app',
+const firebaseApp = admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: 'conveni-trend.firebasestorage.app',
 });
 // データベース接続
 const db = admin.firestore();
@@ -92,7 +92,6 @@ async function getItems() {
 
             // Firestoreに画像URLを更新
             await itemRef.update({ item_image: imageUrl });
-
             const itemsRegionRef = await db.collection('items_region').add({ item_id: itemRef.id });
             const regionPromises = itemRegion.map(async regionName => {
                 const regionRef = await db.collection('region').add({
@@ -113,14 +112,71 @@ async function getItems() {
     await browser.close();
 }
 
+// URLからパスを抽出する関数
+function extractFilePath(url) {
+    try {
+        const decodedUrl = decodeURIComponent(url); // URLデコード
+        const match = decodedUrl.match(/\/itemImage\/(.+)$/); // 必要な部分を抽出
+        return match ? `itemImage/${match[1]}` : null;
+    } catch (error) {
+        console.error('URL解析に失敗しました:', error);
+        return null;
+    }
+}
+
+// ストレージのファイルを公開する関数
+async function makeFilePublic(filePath) {
+    const file = bucket.file(filePath);
+    await file.makePublic();
+    console.log(`File ${filePath} is now public`);
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+    console.log(`Public URL:`, publicUrl);
+    return publicUrl;
+}
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
 app.get('/api/v1/item', async (req, res) => {
     try {
+        //  スクレイピング＆データベースに格納
         await getItems();
-        res.send('スクレイピングを完了しました');
+        //  データベースのデータ取得
+        const itemsRef = db.collection('items');
+        const snapshot = await itemsRef.get();
+        const items = []; // 結果を格納する配列
+        for(const doc of snapshot.docs){
+            const item_name = doc.data().item_name
+            const item_price = doc.data().item_price
+            const item_launch = doc.data().item_launch
+            const item_image = doc.data().item_image
+
+
+           // URLからパスを抽出
+            const filePath = extractFilePath(item_image);
+            if (!filePath) {
+                console.error(`Invalid file path for image: ${item_image}`);
+                continue; // 無効な場合はスキップ
+            }
+
+            // 画像の公開URLを取得
+            const item_image_publicUrl = await makeFilePublic(filePath);
+
+            // データを配列に追加
+            items.push({
+                name: item_name,
+                price: item_price,
+                launch: item_launch,
+                imageUrl: item_image,
+            });
+            
+        };
+        // 処理完了後にレスポンスを送信
+        res.json({
+            message: 'スクレイピングを完了しました',
+            items: items
+        })
     } catch (error) {
         console.error(error);
         res.status(500).send('エラーが発生しました');
@@ -129,10 +185,4 @@ app.get('/api/v1/item', async (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 })
-
-app.get('/api/v1/item', (req, res) => {
-    getItems();
-    res.send('スクレイピングを完了しました');
-})
-
 app.listen(PORT, () => { console.log(`http://localhost:${PORT}`) });

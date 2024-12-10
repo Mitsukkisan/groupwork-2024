@@ -40,7 +40,7 @@ body {
 
 /* カード内のタイトルスタイル */
 .card-title {
-    font-size: 1.25rem; /* タイトルのフォントサイズを大きく設定 */
+    font-size: 0.9rem; /* タイトルのフォントサイズを大きく設定 */
     font-weight: bold; /* タイトルを太字に */
     text-align: center; /* テキストを中央揃えに */
     margin-bottom: 8px; /* タイトルの下に余白を追加 */
