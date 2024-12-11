@@ -15,6 +15,13 @@ body {
     background-color: #fff; /* 背景色を白に設定 */
     margin: 16px auto; /* 上下左右中央揃えにする */
     display: flex; /* フレックスボックスを使って子要素を配置 */
+    border: 1px solid #ddd; /* 薄いグレーのボーダー */
+    border-radius: 8px; /* 角を丸くする */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* さりげない影 */
+    overflow: hidden;  /*コンテンツがはみ出さないようにする */
+    transition: transform 0.3s, box-shadow 0.3s; /* トランジション効果 */
+    padding: 16px; /* 内側の余白 */
+    background-color: #fff; /* 背景色を白に */
 }
 
 /* カードのホバー時の効果 */
@@ -132,3 +139,84 @@ body {
     color: red;
     margin-left: 5px;
   }
+
+/* プルダウン全体のフォントサイズと高さを調整 */
+.form-select {
+    font-size: 0.9rem; /* フォントサイズを小さく */
+    height: 35px; /* 高さを少し小さく */
+    width: 100%; /* 必要に応じて幅を調整 */
+    max-height: 200px; /* 必要に応じて高さを調整 */
+    overflow-y: auto; /* スクロールバーを表示 */
+  }
+  
+  /* 展開時の選択肢のサイズを調整 */
+  .form-select option {
+    font-size: 0.85rem; /* 選択肢のフォントサイズを小さく */
+    padding: 5px; /* 選択肢の間隔を少し小さく */
+  }
+  
+  select {
+    max-height: 150%; /* 最大表示高さ */
+    overflow-y: auto; /* スクロールバーを表示 */
+  }
+  .dropdown-item {
+    flex: 1 1 30%;
+    white-space: nowrap;
+  }
+  .region-option {
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .parent-container {
+    position: relative; /* 必要に応じて修正 */
+    overflow: visible;  /* プルダウンが表示できるようにする */
+    z-index: 1;         /* ドロップダウンの優先度を確保 */
+  }
+
+  
+  .dropdown-menu {
+    position: relative;
+    width: 200px;
+  }
+  
+  .menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .menu-item {
+    position: relative;
+  }
+  
+  .menu-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .submenu {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%; /* 横に展開 */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+  }
+  
+  .submenu li {
+    padding: 10px;
+    white-space: nowrap;
+  }
+  
+  .menu-item:hover .submenu {
+    display: block;
+  }
+  
