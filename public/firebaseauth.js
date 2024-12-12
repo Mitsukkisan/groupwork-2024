@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // Firebase設定
@@ -79,14 +79,16 @@ if (document.getElementById('submitSignin')) {
 }
 
 //  セッション管理
-if(document.getElementById('username')){
+if (document.getElementById('username')) {
     const usernameDOM = document.getElementById('username');
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
         if (user) {
-          const uid = user.displayName || "ゲスト";
-          usernameDOM.innerHTML=uid;
+            const uid = user.displayName || "ゲスト";
+            usernameDOM.innerHTML = uid;
         } else {
         }
     });
 }
+
+
