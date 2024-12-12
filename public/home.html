@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>セブンイレブン</title>
+    <script type="module" src="./firebaseauth.js"></script>
 </head>
 
 <body>
@@ -33,13 +34,13 @@
                 </ul>
                     <div class="d-flex me-2 mt-3">
                         <p class="text-start mt-2 me-1">ログイン中のユーザ:</p>
-                        <p class="text-start mt-2 me-1"id="username">Takeshi Yamamoto</p>
+                        <p class="text-start mt-2 me-1" id="username"></p>
                         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-person-circle me-1" viewBox="0 0 16 16">
                             <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                             <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
                         </svg>
                     </div>
-                <br><button type="submit" class="btn btn-primary text-center">ログアウト</button></br>
+                <br><button type="submit" class="btn btn-primary text-center" id="submitLogout">ログアウト</button></br>
                     
             </div>
         </div>
