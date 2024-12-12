@@ -1,3 +1,20 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+// Firebase設定
+const firebaseConfig = {
+    apiKey: "AIzaSyArHbubY097iRMuvY-Dq8SwSZRpw3mhaNg",
+    authDomain: "conveni-trend.firebaseapp.com",
+    projectId: "conveni-trend",
+    storageBucket: "conveni-trend.firebasestorage.app",
+    messagingSenderId: "968316614555",
+    appId: "1:968316614555:web:a2efa219e0586ad665933e",
+    measurementId: "G-6YY0LVQ8MZ"
+};
+
+// Firebase初期化
+const app = initializeApp(firebaseConfig);
 const itemsDOM = document.getElementById('itemRow');
 
 const showItems = async () => {
@@ -7,16 +24,17 @@ const showItems = async () => {
         console.log(response);
         const { data: { items } } = response;
         const allItems = items.map(item => {
-            const { name, price, launch, imageUrl } = item;
+            const { id, name, price, launch, imageUrl, favorites, regions } = item;
+            const taxedPrice = Math.floor(price * 1.08);
             return `<div class="col">
                 <div class="card">
                     <img class="card-img-top" src="${imageUrl}" alt="商品画像">
                     <div class="card-body">
                         <h6 class="card-title">${name}</h6>
-                        <p class="card-text">${price}</p>
-                        <p class="card-text">${launch}</p>
-                        <p class="card-text">販売地域：宮城県、山形県、近畿、九州</p>
-                        <div class="btn btn-outline-primary like-button" onclick="toggleLike(this)">
+                        <p class="card-text">${price}円（税込${taxedPrice}円）</p>
+                        <p class="card-text">${launch}以降順次発売</p>
+                        <p class="card-text">販売地域：${regions}</p>
+                        <div class="btn btn-outline-primary like-button" id="${id}" onclick="toggleLike(this)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" 
                                 class="icon bi bi-hand-thumbs-up" viewBox="0 0 16 16">
                                 <path
@@ -30,6 +48,44 @@ const showItems = async () => {
         }).join("");
         console.log(allItems);
         itemsDOM.innerHTML = allItems;
+        // 挿入後にイベントリスナーを設定
+        const favoriteButtons = document.querySelectorAll(".btn");
+        favoriteButtons.forEach(button => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+
+                // クリックされたボタンが所属するカードを取得
+                const cardId = event.currentTarget.id;
+    
+                const auth = getAuth();
+                const db = getFirestore();
+    
+                // Firebase Auth の状態を監視
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        const uid = user.uid;
+                        console.log(`ログインユーザーID: ${uid}`);
+                        const docRef = doc(db, "favorites", cardId);
+    
+                        const favoriteData = {
+                            user_id: uid,
+                            item_id: cardId
+                        };
+    
+                        // Firestoreにデータを保存
+                        setDoc(docRef, favoriteData)
+                            .then(() => {
+                                window.alert("お気に入りに登録しました");
+                            })
+                            .catch((error) => {
+                                console.error("お気に入り登録に失敗しました: ", error);
+                            });
+                    } else {
+                        console.error("ログインしていないため、お気に入り登録に失敗しました");
+                    }
+                })
+            });
+        });
     } catch (err) {
         console.log(err);
     }
