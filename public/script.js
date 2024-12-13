@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getFirestore, setDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // Firebase設定
 const firebaseConfig = {
@@ -15,17 +15,20 @@ const firebaseConfig = {
 
 // Firebase初期化
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 const itemsDOM = document.getElementById('itemRow');
 
+// 商品表示関数
 const showItems = async () => {
     try {
-        console.log(axios);
-        const response = await axios.get("/api/v1/item");
-        console.log(response);
+        const response = await axios.get("/api/v1/item"); // 商品データをAPIから取得
         const { data: { items } } = response;
+
+        // 商品カードを生成
         const allItems = items.map(item => {
-            const { id, name, price, launch, imageUrl, favorites, regions } = item;
-            const taxedPrice = Math.floor(price * 1.08);
+            const { id, name, price, launch, imageUrl, regions } = item;
+            const taxedPrice = Math.floor(price * 1.08); // 税込み価格計算
             return `<div class="col">
                 <div class="card">
                     <img class="card-img-top" src="${imageUrl}" alt="商品画像">
@@ -34,7 +37,7 @@ const showItems = async () => {
                         <p class="card-text">${price}円（税込${taxedPrice}円）</p>
                         <p class="card-text">${launch}以降順次発売</p>
                         <p class="card-text">販売地域：${regions}</p>
-                        <div class="btn btn-outline-primary like-button" id="${id}" onclick="toggleLike(this)">
+                       <div class="btn btn-outline-primary like-button" id="${id}" onclick="toggleLike(this)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" 
                                 class="icon bi bi-hand-thumbs-up" viewBox="0 0 16 16">
                                 <path
@@ -47,51 +50,47 @@ const showItems = async () => {
             </div>`;
         }).join("");
         console.log(allItems);
-        itemsDOM.innerHTML = allItems;
-        // 挿入後にイベントリスナーを設定
-        const favoriteButtons = document.querySelectorAll(".btn");
+        itemsDOM.innerHTML = allItems; // 商品カードをDOMに挿入
+
+        // お気に入りボタンにイベントリスナーを追加
+        const favoriteButtons = document.querySelectorAll(".like-button");
         favoriteButtons.forEach(button => {
-            button.addEventListener("click", (event) => {
-                event.preventDefault();
-
-                // クリックされたボタンが所属するカードを取得
-                const cardId = event.currentTarget.id;
-    
-                const auth = getAuth();
-                const db = getFirestore();
-    
-                // Firebase Auth の状態を監視
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        const uid = user.uid;
-                        console.log(`ログインユーザーID: ${uid}`);
-                        const docRef = doc(db, "favorites", cardId);
-    
-                        const favoriteData = {
-                            user_id: uid,
-                            item_id: cardId
-                        };
-    
-                        // Firestoreにデータを保存
-                        setDoc(docRef, favoriteData)
-                            .then(() => {
-                                window.alert("お気に入りに登録しました");
-                            })
-                            .catch((error) => {
-                                console.error("お気に入り登録に失敗しました: ", error);
-                            });
-                    } else {
-                        console.error("ログインしていないため、お気に入り登録に失敗しました");
-                    }
-                })
-            });
+            button.addEventListener("click", () => toggleFavorite(button));
         });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        console.error("アイテムの取得に失敗しました:", error);
     }
-}
+};
 
+// お気に入り登録・解除関数
+const toggleFavorite = async (button) => {
+    const itemId = button.id; // ボタンのIDを取得
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const uid = user.uid; // ユーザーIDを取得
+            console.log(`ログインユーザーID: ${uid}`);
+            const docRef = doc(db, "favorites", `${uid}_${itemId}`); // お気に入りデータの参照を作成
+            const isFavorited = button.classList.contains("favorited");
+
+            try {
+                if (isFavorited) {
+                    await deleteDoc(docRef); // Firestoreからお気に入りを削除
+                    button.classList.remove("favorited"); // ボタンの状態を解除
+                    alert("お気に入りを解除しました");
+                } else {
+                    await setDoc(docRef, { user_id: uid, item_id: itemId }); // Firestoreにお気に入りを保存
+                    button.classList.add("favorited"); // ボタンの状態をお気に入りに変更
+                    alert("お気に入りに登録しました");
+                }
+            } catch (error) {
+                console.error("お気に入り操作に失敗しました:", error);
+                alert("お気に入り操作に失敗しました。もう一度お試しください。");
+            }
+        } else {
+            alert("ログインしていないため、お気に入り登録に失敗しました");
+        }
+    });
+};
+
+// 初期化
 showItems();
-
-
-
