@@ -75,3 +75,21 @@ const regionToPrefecture = {
             });
         });
 })();
+document.addEventListener('DOMContentLoaded', function() {
+    // ラジオボタンを初期化
+    const radios = document.getElementsByName('conbini');
+    radios.forEach(radio => {
+      radio.checked = false;
+    });
+
+    // セレクトボックスを初期化
+    const selectElements = document.querySelectorAll('select');
+    selectElements.forEach(select => {
+      select.selectedIndex = 0;  // 最初の選択肢に設定
+    });
+  });
+
+  // キャッシュを無効化してページが戻ったときに選択状態をリセット
+  if (performance.navigation.type === 2) {
+    window.location.reload();
+  }
