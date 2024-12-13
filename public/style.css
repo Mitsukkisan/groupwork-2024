@@ -18,7 +18,6 @@ body {
     border: 1px solid #ddd; /* 薄いグレーのボーダー */
     border-radius: 8px; /* 角を丸くする */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* さりげない影 */
-    overflow: hidden;  /*コンテンツがはみ出さないようにする */
     transition: transform 0.3s, box-shadow 0.3s; /* トランジション効果 */
     padding: 16px; /* 内側の余白 */
     background-color: #fff; /* 背景色を白に */
