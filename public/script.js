@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, setDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // Firebase設定
 const firebaseConfig = {
@@ -49,7 +50,7 @@ const showItems = async () => {
                 </div>
             </div>`;
         }).join("");
-        console.log(allItems);
+        // console.log(allItems);
         itemsDOM.innerHTML = allItems; // 商品カードをDOMに挿入
 
         // お気に入りボタンにイベントリスナーを追加
@@ -73,14 +74,35 @@ const toggleFavorite = async (button) => {
             const isFavorited = button.classList.contains("favorited");
 
             try {
-                if (isFavorited) {
-                    await deleteDoc(docRef); // Firestoreからお気に入りを削除
-                    button.classList.remove("favorited"); // ボタンの状態を解除
-                    alert("お気に入りを解除しました");
+                const itemDocRef = doc(db, "items", itemId);
+                const itemDoc = await getDoc(itemDocRef);
+
+                if (itemDoc.exists()) {
+                    const currentFavorites = itemDoc.data().favorites || 0;
+
+                    if (isFavorited) {
+                        await deleteDoc(docRef); // Firestoreからお気に入りを削除
+                        button.classList.remove("favorited"); // ボタンの状態を解除
+                        alert("お気に入りを解除しました");
+
+                        // favoritesを-1更新
+                        await updateDoc(itemDocRef, {
+                            favorites: currentFavorites > 0 ? currentFavorites - 1 : 0
+                        });
+                        console.log("favoritesを減少させました");
+                    } else {
+                        await setDoc(docRef, { user_id: uid, item_id: itemId }); // Firestoreにお気に入りを保存
+                        button.classList.add("favorited"); // ボタンの状態をお気に入りに変更
+                        alert("お気に入りに登録しました");
+
+                        // favoritesを+1更新
+                        await updateDoc(itemDocRef, {
+                            favorites: currentFavorites + 1
+                        });
+                        console.log("favoritesを増加させました");
+                    }
                 } else {
-                    await setDoc(docRef, { user_id: uid, item_id: itemId }); // Firestoreにお気に入りを保存
-                    button.classList.add("favorited"); // ボタンの状態をお気に入りに変更
-                    alert("お気に入りに登録しました");
+                    console.log("アイテムが見つかりませんでした");
                 }
             } catch (error) {
                 console.error("お気に入り操作に失敗しました:", error);
