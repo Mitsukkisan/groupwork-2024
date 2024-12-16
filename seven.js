@@ -143,75 +143,56 @@ async function makeFilePublic(filePath) {
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
-
+app.get('/api/v1/scraping',async(req,res)=>{
+    getItems();
+    res.send("スクレイピングを完了しました")
+})
 app.get('/api/v1/item', async (req, res) => {
     const cacheKey = 'items';
     const now = Date.now();
 
-    // キャッシュをチェック
     if (cache[cacheKey] && (now - cache[cacheKey].timestamp < CACHE_EXPIRATION)) {
         console.log('Returning cached data');
         return res.json(cache[cacheKey].data);
     }
+
     try {
-        //  スクレイピング＆データベースに格納
-        await getItems();
-        //  データベースのデータ取得
         const itemsRef = db.collection('items');
-        const snapshot = await itemsRef.get()
-        const items = []; // 結果を格納する配列
-        for (const doc of snapshot.docs) {
+        const snapshot = await itemsRef.get();
+
+        const items = await Promise.all(snapshot.docs.map(async (doc) => {
+            const data = doc.data();
             const id = doc.id;
-            const item_name = doc.data().name
-            const item_price = doc.data().price
-            const timestamp = doc.data().launch_date
-            console.log(timestamp)
-            const item_image = doc.data().item_image
-            const favorites = doc.data().favorites
-            const regions = doc.data().regions;
-            let formattedDate;
-            if (timestamp != undefined) {
-                const date = new Date(timestamp._seconds * 1000);
-                // 曜日名のリスト
-                const days = ["日", "月", "火", "水", "木", "金", "土"];
-                // 年、月、日、曜日を取得
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0'); // 0始まりなので+1
-                const day = String(date.getDate()).padStart(2, '0'); // 日を2桁にフォーマット
-                const weekday = days[date.getDay()]; // 曜日名を取得
 
-                // フォーマットされた日付文字列
-                formattedDate = `${year}年${month}月${day}日(${weekday})`;
-                console.log(formattedDate)
-            }
-            else {
-                formattedDate = "不明"
+            let formattedDate = "不明";
+            if (data.launch_date) {
+                const date = new Date(data.launch_date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
+                formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
             }
 
-            // URLからパスを抽出
-            const filePath = extractFilePath(item_image);
-            if (!filePath) {
-                console.error(`Invalid file path for image: ${item_image}`);
-                continue; // 無効な場合はスキップ
+            let imageUrl = data.public_image_url || data.item_image;
+            if (!data.public_image_url) {
+                const filePath = extractFilePath(data.item_image);
+                if (filePath) {
+                    imageUrl = await makeFilePublic(filePath);
+                    await db.collection('items').doc(id).update({ public_image_url: imageUrl });
+                }
             }
 
-            // 画像の公開URLを取得
-            const item_image_publicUrl = await makeFilePublic(filePath);
-            // データを配列に追加
-            items.push({
-                id: id,
-                name: item_name,
-                price: item_price,
+            return {
+                id,
+                name: data.name,
+                price: data.price,
                 launch: formattedDate,
-                imageUrl: item_image,
-                favorites: favorites,
-                regions: regions,
-            });
-        };
-        // キャッシュに保存
+                imageUrl,
+                favorites: data.favorites,
+                regions: data.regions,
+            };
+        }));
+
         cache[cacheKey] = {
             timestamp: now,
-            data: { message: 'スクレイピングを完了しました', items: items }
+            data: { message: 'データ取得成功', items },
         };
 
         res.json(cache[cacheKey].data);
@@ -220,6 +201,7 @@ app.get('/api/v1/item', async (req, res) => {
         res.status(500).send('エラーが発生しました');
     }
 });
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 })
