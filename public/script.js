@@ -25,7 +25,7 @@ const showItems = async () => {
     try {
         const response = await axios.get("/api/v1/item"); // 商品データをAPIから取得
         const { data: { items } } = response;
-
+        
         // 商品カードを生成
         const allItems = items.map(item => {
             const { id, name, price, launch, imageUrl, regions } = item;
