@@ -218,4 +218,15 @@ body {
   .menu-item:hover .submenu {
     display: block;
   }
-  
+ /* プルダウンメニューのテキストとサイズを他の文字と揃える */
+.btn-secondary {
+  border: none;               /* 枠線なし */
+  background-color: transparent; /* 背景色を透明に */
+  color: inherit;             /* テキスト色を親要素に合わせる */
+  font-size: 16px;            /* 他の文字と同じフォントサイズに */
+  line-height: 1.5;           /* 行の高さを揃える */
+  padding: 0;                 /* 余白をなくす */
+  vertical-align: middle;     /* 縦方向の中央揃え */
+  box-shadow: none;           /* ボタンの影をなくす */
+}
+
