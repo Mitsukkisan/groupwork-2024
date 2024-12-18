@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // Firebase設定
@@ -15,6 +15,7 @@ const firebaseConfig = {
 
 // Firebase初期化
 const app = initializeApp(firebaseConfig);
+const auth = getAuth();
 
 // サインアップ処理 (signup.html)
 if (document.getElementById('submitSignup')) {
@@ -23,8 +24,6 @@ if (document.getElementById('submitSignup')) {
         event.preventDefault();
         const email = document.getElementById('signupEmail').value;
         const password = document.getElementById('signupPassword').value;
-
-        const auth = getAuth();
         const db = getFirestore();
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
@@ -58,7 +57,6 @@ if (document.getElementById('submitSignin')) {
         event.preventDefault();
         const email = document.getElementById('signinEmail').value;
         const password = document.getElementById('signinPassword').value;
-        const auth = getAuth();
 
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
@@ -81,14 +79,29 @@ if (document.getElementById('submitSignin')) {
 //  セッション管理
 if (document.getElementById('username')) {
     const usernameDOM = document.getElementById('username');
-    const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
         if (user) {
+
             const uid = user.displayName || "ゲスト";
             usernameDOM.innerHTML = uid;
         } else {
         }
     });
+}
+
+//  ログアウト処理
+if (document.getElementById('submitLogout')) {
+    const submitLogoutDOM = document.getElementById('submitLogout');    //  ログアウトボタンのDOM取得
+    //  クリック時にログアウト確認ダイアログを表示
+    submitLogoutDOM.addEventListener('click', () => {
+        const isConfirmed = window.confirm("ログアウトしますか？")
+        //  "OK"を押された場合にログアウトする
+        if (isConfirmed) {
+            auth.signOut(); //  ログアウト実行
+            window.location.href = "./index.html";  //  ログイン画面に遷移
+        }
+
+    })
 }
 
 

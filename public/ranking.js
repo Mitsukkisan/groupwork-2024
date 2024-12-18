@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js"
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, setDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 import { getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
@@ -16,31 +16,38 @@ const firebaseConfig = {
 
 // Firebase初期化
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const itemsDOM = document.getElementById('itemRow');
+const auth = getAuth(app);
 const db = getFirestore(app);
+const itemsDOM = document.getElementById('itemRow');
 
-const getFavorites = async () => {
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            console.log(user.uid);
-            try {
-                const response = await axios.get(`/api/v1/favorites?uid=${user.uid}`);
-                const { data: { items } } = response;
+const getRanking = async()=>{
+    try {
+        const response = await axios.get('/api/v1/ranking');
+        const { data: { items } } = response;
+        console.log(items);
+        // ランク用画像の定義
+        const rankImages = [
+            "./rank1_1.png",        // 1位
+            "./rank2_1.png",        // 2位
+            "./rank3_1.png"         // 3位
+        ];
 
-                // 商品カードを生成
-                const allItems = items.map(item => {
-                    const { id, name, price, launch, imageUrl, regions } = item;
-                    const taxedPrice = Math.floor(price * 1.08); // 税込み価格計算
-                    return `<div class="col">
+        // 商品カードを生成
+        const allItems = items.map((item,index) => {
+            const { id, name, price, launch, imageUrl, regions,favorites } = item;
+            const taxedPrice = Math.floor(price * 1.08); // 税込み価格計算
+            return `<div class="col">
                 <div class="card">
-                    <img class="card-img-top" src="${imageUrl}" alt="商品画像">
+                    <div class="image-wrapper">
+                        <img class="ranking-img" src="${rankImages[index]}" alt="${index+1}位">
+                        <img class="card-img-top" src="${imageUrl}" alt="商品画像">
+                    </div>
                     <div class="card-body">
                         <h6 class="card-title">${name}</h6>
                         <p class="card-text">${price}円（税込${taxedPrice}円）</p>
                         <p class="card-text">${launch}以降順次発売</p>
                         <p class="card-text">販売地域：${regions}</p>
-                       <div class="btn btn-outline-primary like-button active favorited" id="${id}" onclick="toggleLike(this)">
+                       <div class="btn btn-outline-primary like-button" id="${id}" onclick="toggleLike(this)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" 
                                 class="icon bi bi-hand-thumbs-up" viewBox="0 0 16 16">
                                 <path
@@ -48,24 +55,25 @@ const getFavorites = async () => {
                             </svg>
                             <span>お気に入り</span>
                         </div>
+                        
+                        <p class="card-text">お気に入り登録数：${favorites}</p>
                     </div>
                 </div>
             </div>`;
-                }).join("");
-                // console.log(allItems);
-                itemsDOM.innerHTML = allItems; // 商品カードをDOMに挿入
+        }).join("");
+        // console.log(allItems);
+        itemsDOM.innerHTML = allItems; // 商品カードをDOMに挿入
 
-                // お気に入りボタンにイベントリスナーを追加
-                const favoriteButtons = document.querySelectorAll(".like-button");
-                favoriteButtons.forEach(button => {
-                    button.addEventListener("click", () => toggleFavorite(button));
-                });
-            } catch (error) {
-                console.error("アイテムの取得に失敗しました:", error);
-            }
-        }
-    });
-}
+        // お気に入りボタンにイベントリスナーを追加
+        const favoriteButtons = document.querySelectorAll(".like-button");
+        favoriteButtons.forEach(button => {
+            button.addEventListener("click", () => toggleFavorite(button));
+        });
+    } catch (error) {
+        console.error("アイテムの取得に失敗しました:", error);
+    }
+};
+// お気に入り登録・解除関数
 const toggleFavorite = async (button) => {
     const itemId = button.id; // ボタンのIDを取得
     onAuthStateChanged(auth, async (user) => {
@@ -92,9 +100,6 @@ const toggleFavorite = async (button) => {
                             favorites: currentFavorites > 0 ? currentFavorites - 1 : 0
                         });
                         console.log("favoritesを減少させました");
-
-                        // お気に入り解除後に再度showFavoritesを実行
-                        await getFavorites();  // awaitをつけて非同期で処理を待つ
                     } else {
                         await setDoc(docRef, { user_id: uid, item_id: itemId }); // Firestoreにお気に入りを保存
                         button.classList.add("favorited"); // ボタンの状態をお気に入りに変更
@@ -119,5 +124,4 @@ const toggleFavorite = async (button) => {
     });
 };
 
-
-getFavorites();
+getRanking();

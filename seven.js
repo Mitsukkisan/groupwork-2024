@@ -7,6 +7,8 @@ const admin = require('firebase-admin');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, } = require('firebase-admin/firestore');
 require('dotenv').config();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // キャッシュ用オブジェクト
 const cache = {};
@@ -20,6 +22,8 @@ const firebaseApp = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     storageBucket: 'conveni-trend.firebasestorage.app',
 });
+// auth
+const auth = admin.auth();
 // データベース接続
 const db = admin.firestore();
 //  ストレージバケット接続
@@ -140,26 +144,73 @@ async function makeFilePublic(filePath) {
     return publicUrl;
 }
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
-});
-app.get('/api/v1/scraping',async(req,res)=>{
-    getItems();
-    res.send("スクレイピングを完了しました")
-})
-app.get('/api/v1/item', async (req, res) => {
-    const cacheKey = 'items';
-    const now = Date.now();
+app.get('/api/v1/favorites', async (req, res) => {
+    const { uid } = req.query; // クエリパラメータからuidを取得
+    if (uid) {
+        console.log(`Received UID: ${uid}`);
+        // ここでuidを使って処理を行う
+        const favoritesRef = db.collection('favorites');
+        const snapshot = await favoritesRef.where('user_id', '==', uid).get();
 
-    if (cache[cacheKey] && (now - cache[cacheKey].timestamp < CACHE_EXPIRATION)) {
-        console.log('Returning cached data');
-        return res.json(cache[cacheKey].data);
+        // Promise.allを使って非同期で処理する
+        const items = await Promise.all(snapshot.docs.map(async (doc) => {
+            const favoritesData = doc.data();
+            const itemId = favoritesData.item_id;
+
+            // itemsコレクションから商品情報を取得
+            const itemRef = db.collection('items').doc(itemId);
+            const itemSnapshot = await itemRef.get(); // ここを修正
+
+            if (!itemSnapshot.exists) { // itemSnapshotに変更
+                console.log(`Item with ID ${itemId} not found`);
+                return null; // アイテムが存在しない場合はnullを返す
+            }
+
+            const data = itemSnapshot.data(); // .data() を呼び出して商品データを取得
+            const id = itemSnapshot.id
+            console.log(id);
+            let formattedDate = "不明";
+
+            // launch_dateが存在する場合はフォーマットを変更
+            if (data.launch_date) {
+                const date = new Date(data.launch_date._seconds * 1000);    // TIMESTAMP型をDate型に変換
+                formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
+            }
+
+            let imageUrl = data.public_image_url || data.item_image;
+            if (!data.public_image_url) {
+                const filePath = extractFilePath(data.item_image);
+                if (filePath) {
+                    imageUrl = await makeFilePublic(filePath);
+                    await db.collection('items').doc(id).update({ public_image_url: imageUrl });
+                }
+            }
+
+            // 商品データを返す
+            return {
+                id,
+                name: data.name,
+                price: data.price,
+                launch: formattedDate,
+                imageUrl,
+                favorites: data.favorites,
+                regions: data.regions,
+            };
+        }));
+
+        // nullのアイテムをフィルタリング
+        const validItems = items.filter(item => item !== null);
+
+        // items配列をレスポンスとして返す
+        res.status(200).send({ message: `Favorites for user ${uid}`, items: validItems });
+    } else {
+        res.status(400).send({ error: 'UID is required' });
     }
-
+});
+app.get('/api/v1/ranking', async (req, res) => {
     try {
         const itemsRef = db.collection('items');
-        const snapshot = await itemsRef.get();
-
+        const snapshot = await itemsRef.orderBy('favorites', 'desc').limit(3).get();
         const items = await Promise.all(snapshot.docs.map(async (doc) => {
             const data = doc.data();
             const id = doc.id;
@@ -189,13 +240,54 @@ app.get('/api/v1/item', async (req, res) => {
                 regions: data.regions,
             };
         }));
+        return res.json({ message: 'データ取得成功', items });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("エラーが発生しました");
+    }
+})
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
+app.get('/api/v1/scraping', async (req, res) => {
+    getItems();
+    res.send("スクレイピングを完了しました")
+})
+app.get('/api/v1/item', async (req, res) => {
+    try {
+        const itemsRef = db.collection('items');
+        const snapshot = await itemsRef.get();
+        
+        const items = await Promise.all(snapshot.docs.map(async (doc) => {
+            const data = doc.data();
+            const id = doc.id;
 
-        cache[cacheKey] = {
-            timestamp: now,
-            data: { message: 'データ取得成功', items },
-        };
+            let formattedDate = "不明";
+            if (data.launch_date) {
+                const date = new Date(data.launch_date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
+                formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
+            }
 
-        res.json(cache[cacheKey].data);
+            let imageUrl = data.public_image_url || data.item_image;
+            if (!data.public_image_url) {
+                const filePath = extractFilePath(data.item_image);
+                if (filePath) {
+                    imageUrl = await makeFilePublic(filePath);
+                    await db.collection('items').doc(id).update({ public_image_url: imageUrl });
+                }
+            }
+
+            return {
+                id,
+                name: data.name,
+                price: data.price,
+                launch: formattedDate,
+                imageUrl,
+                favorites: data.favorites,
+                regions: data.regions,
+            };
+        }));
+        return res.json({ message: 'データ取得成功', items });
     } catch (error) {
         console.error(error);
         res.status(500).send('エラーが発生しました');
