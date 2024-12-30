@@ -24,20 +24,21 @@ const itemsDOM = document.getElementById('itemRow');
 const showItems = async () => {
     try {
         const response = await axios.get("/api/v1/item"); // 商品データをAPIから取得
-        const { data: { items } } = response;
+        const { data: { products } } = response;
         
         // 商品カードを生成
-        const allItems = items.map(item => {
-            const { id, name, price, launch, imageUrl, regions } = item;
-            const taxedPrice = Math.floor(price * 1.08); // 税込み価格計算
+        const productCard = products.map(product => {
+            const { id, name, price, date, image, regions,allergies } = product;
+            // const taxedPrice = Math.floor(price * 1.08); // 税込み価格計算
             return `<div class="col">
                 <div class="card">
-                    <img class="card-img-top" src="${imageUrl}" alt="商品画像">
+                    <img class="card-img-top" src="${image}" alt="商品画像">
                     <div class="card-body">
                         <h6 class="card-title">${name}</h6>
-                        <p class="card-text">${price}円（税込${taxedPrice}円）</p>
-                        <p class="card-text">${launch}以降順次発売</p>
+                        <p class="card-text">販売価格:${price}円(税込み)</p>
+                        <p class="card-text">${date}以降順次発売</p>
                         <p class="card-text">販売地域：${regions}</p>
+                        <p class="card-text">特定原材料8品目：${allergies}</p>
                        <div class="btn btn-outline-primary like-button" id="${id}" onclick="toggleLike(this)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" 
                                 class="icon bi bi-hand-thumbs-up" viewBox="0 0 16 16">
@@ -51,7 +52,7 @@ const showItems = async () => {
             </div>`;
         }).join("");
         // console.log(allItems);
-        itemsDOM.innerHTML = allItems; // 商品カードをDOMに挿入
+        itemsDOM.innerHTML = productCard; // 商品カードをDOMに挿入
 
         // お気に入りボタンにイベントリスナーを追加
         const favoriteButtons = document.querySelectorAll(".like-button");

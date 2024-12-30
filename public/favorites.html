@@ -31,30 +31,20 @@
                         <a class="nav-link active" aria-current="page" href="./ranking.html">ランキング</a>
                     </li>
                     <li class="nav-item">
-                        <div class="dropdown mx-2">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                              新着商品
-                            </button>
-                            <ul class="dropdown-menu">
-                              <li><a class="dropdown-item" href="#">価格：安い順</a></li>
-                              <li><a class="dropdown-item" href="#">価格：高い順</a></li>
-                            </ul>
-                          </div>
-                    </li>
+                        <select class="form-select me-2" aria-label="selectOrder">
+                            <option value="0"selected >並び替え：新着商品</option>
+                            <option value="1">価格：安い順</option>
+                            <option value="2">価格：高い順</option>
+                          </select>
                     <li class="nav-item">
-                        <div class="dropdown mx-2">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                並び替え
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">セブンイレブン</a></li>
-                              <li><a class="dropdown-item" href="#">ファミリーマート</a></li>
-                              <li><a class="dropdown-item" href="#">ローソン</a></li>
-                            </ul>
-                          </div>
+                        <select class="form-select me-2" id="selectStore">
+                            <option value="0"selected >表示店舗：セブンイレブン</option>
+                            <option value="1">ファミリーマート</option>
+                            <option value="2">ローソン</option>
+                        </select>
                     </li>
                 </ul>
-                    <div class="d-flex me-2 mt-3">
+                    <div class="d-flex me-2 mt-2">
                         <p class="text-start mt-2 me-1">ログイン中のユーザ:</p>
                         <p class="text-start mt-2 me-1" id="username"></p>
                         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-person-circle me-1" viewBox="0 0 16 16">

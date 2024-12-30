@@ -63,7 +63,7 @@ if (document.getElementById('submitSignin')) {
                 window.alert("ログインに成功しました");
                 const user = userCredential.user;
                 localStorage.setItem('loggedInUserId', user.uid);
-                window.location.href = "./home.html";
+                window.location.href = "./menu.html";
             })
             .catch((err) => {
                 const errorCode = err.code;

@@ -3,34 +3,37 @@ const app = express();
 app.use(express.static("./public"));
 const axios = require('axios');
 const PORT = process.env.PORT || 5000;
+// ミドルウェアの設定
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const admin = require('firebase-admin');
-const { initializeApp } = require('firebase-admin/app');
-const { getFirestore, } = require('firebase-admin/firestore');
+// const { initializeApp } = require('firebase-admin/app');
+// const { getFirestore, } = require('firebase-admin/firestore');
 require('dotenv').config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// キャッシュ用オブジェクト
-const cache = {};
-// キャッシュの有効期限（ミリ秒）
-const CACHE_EXPIRATION = 300000; // 5分
-
-//  サービスアカウントファイル
-const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-// ADMIN SDK初期化
-const firebaseApp = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'conveni-trend.firebasestorage.app',
-});
+const {firebaseApp, db, bucket} = require('./firebaseConfig');
+const {sevenElevenScraper,addSevenElevenProducts, getSevenElevenProducts,} = require('./models/SevenElevenProducts');
+const {lawsonScraper,addLawsonProducts, getLawsonProducts,} = require('./models/LawsonProducts');
+// console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+// //  サービスアカウントファイル
+// const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+// // ADMIN SDK初期化
+// const firebaseApp = initializeApp({
+//     credential: applicationDefault(),
+//     storageBucket: 'conveni-trend.firebasestorage.app',
+// });
 // auth
 const auth = admin.auth();
-// データベース接続
-const db = admin.firestore();
-//  ストレージバケット接続
-const bucket = admin.storage().bucket();
+// // データベース接続
+// const db = admin.firestore();
+// //  ストレージバケット接続
+// const bucket = admin.storage().bucket();
+
 
 //  webスクレイピング用モジュールをインスタンス化
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer');
+// const { addLawsonProducts } = require('./LawsonProducts');
 
 //  セブンイレブンの各商品情報の要素
 const elements = '.pbNested> div > div.list_inner';
@@ -64,85 +67,106 @@ async function uploadImageToStorage(imageUrl, fileName) {
     }
 }
 
-async function getItems() {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    await page.goto('https://www.sej.co.jp/products/a/thisweek/');
+async function addProducts() {
+    addSevenElevenProducts();
+    addLawsonProducts();
+    // const browser = await puppeteer.launch({ headless: false });
+    // const page = await browser.newPage();
+    // await page.goto('https://www.sej.co.jp/products/a/thisweek/');
+    // const datas = await page.$$(elements);
+    // for (let i = 0; i < datas.length; i++) {
+    //     const currentProducts = await page.$$(elements); 
+    //     const data = currentProducts[i];
+    //     const img = await data.$('figure > a > img');
+    //     const itemImage = await img.evaluate(el => el.getAttribute('data-original'));
+    //     const nameElementHandle = await data.$('div.item_ttl > p > a');
+    //     const name = await nameElementHandle.evaluate(el => el.textContent.trim());
+    //     const price = await data.$('div > div.item_price > p');
+    //     const rawPrice = await price.evaluate(el => el.textContent.trim());
+    //     const pricepattern = /(\d+)円/;
+    //     const priceResult = rawPrice.match(pricepattern);
+    //     //  文字列から整数型に変換
+    //     const itemPrice = parseInt(priceResult[1], 10);
+    //     console.log(`${itemPrice}円`);
+    //     //  商品販売開始日
+    //     const pattern = /（.）以降順次発売/;
+    //     const datePattern = /(\d{4})年(\d{1,2})月(\d{1,2})日/;
+    //     const launchDate = await data.$('div > div.item_launch > p');
+    //     const rawLaunchDate = await launchDate.evaluate(el => el.textContent.trim());
+    //     const trimedLaunchDate = rawLaunchDate.replace(pattern, "").trim();
+    //     const itemLaunchDate = trimedLaunchDate.replace(datePattern, "$1-$2-$3");
+    //     const date = new Date(itemLaunchDate)
+    //     const region = await data.$('div > div.item_region > p');
+    //     const rawRegion = await region.evaluate(el => el.textContent.trim());
+    //     const itemRegion = rawRegion.replace("販売地域：", "").split("、");
+    //     await Promise.all(
+    //         [
+    //             page.waitForNavigation(),
+    //             data.$eval('figure > a', el => el.click()) // li要素内のaタグをクリック
+    //         ]
+    //     )
+    //     console.log("新商品のページURL", page.url());
 
-    const datas = await page.$$(elements);
+    //     const allergiesElementHandle = await page.$('#pbBlock1778459 > div.detail_wrap> div.allergy > table > tbody > tr:nth-child(1) > td > dl > dd');
+    //     const rawallergies = await allergiesElementHandle.evaluate(el => el.textContent.trim());
+    //     const allergies = rawallergies.split('・').map(item => item.trim());
+    //     console.log("この商品のアレルギー",allergies)
+    //     // 前のページに戻る
+    //     await Promise.all(
+    //         [
+    //             page.waitForNavigation({ waitUntil: 'load' }),
+    //             page.goBack(),
+    //         ]
+    //     )
+    //     console.log("戻ったページ:", page.url())
+    //     const query = await db.collection("items").where('name', '==', name).get();
 
-    for (const data of datas) {
-        const img = await data.$('figure > a > img');
-        const itemImage = await img.evaluate(el => el.getAttribute('data-original'));
-        const name = await data.$('div.item_ttl > p > a');
-        const itemName = await name.evaluate(el => el.textContent.trim());
-        const price = await data.$('div > div.item_price > p');
-        const rawPrice = await price.evaluate(el => el.textContent.trim());
-        const pricepattern = /(\d+)円/;
-        const priceResult = rawPrice.match(pricepattern);
-        //  文字列から整数型に変換
-        const itemPrice = parseInt(priceResult[1], 10);
-        console.log(`${itemPrice}円`);
-        //  商品販売開始日
-        const pattern = /（.）以降順次発売/;
-        const datePattern = /(\d{4})年(\d{1,2})月(\d{1,2})日/;
-        const launchDate = await data.$('div > div.item_launch > p');
-        const rawLaunchDate = await launchDate.evaluate(el => el.textContent.trim());
-        const trimedLaunchDate = rawLaunchDate.replace(pattern, "").trim();
-        const itemLaunchDate = trimedLaunchDate.replace(datePattern, "$1-$2-$3");
-        const date = new Date(itemLaunchDate)
-        const region = await data.$('div > div.item_region > p');
-        const rawRegion = await region.evaluate(el => el.textContent.trim());
-        const itemRegion = rawRegion.replace("販売地域：", "").split("、");
+    //     if (query.empty) {
+    //         const itemRef = await db.collection('items').add({
+    //             name: name,
+    //             price: itemPrice,
+    //             launch_date: date,
+    //             favorites: 0,
+    //             regions: itemRegion,
+    //         });
 
-        const query = await db.collection("items").where('name', '==', itemName).get();
+    //         console.log(`商品を追加しました: ${itemRef.id}`);
 
-        if (query.empty) {
-            const itemRef = await db.collection('items').add({
-                name: itemName,
-                price: itemPrice,
-                launch_date: date,
-                favorites: 0,
-                regions: itemRegion,
-            });
+    //         // 画像をアップロード
+    //         const fileName = `${itemRef.id}.jpg`;
+    //         const imageUrl = await uploadImageToStorage(itemImage, fileName);
 
-            console.log(`商品を追加しました: ${itemRef.id}`);
+    //         // Firestoreに画像URLを更新
+    //         await itemRef.update({ item_image: imageUrl });
+    //     } else {
+    //         console.log(`既に登録されています: ${name}`);
+    //     }
+    // }
 
-            // 画像をアップロード
-            const fileName = `${itemRef.id}.jpg`;
-            const imageUrl = await uploadImageToStorage(itemImage, fileName);
-
-            // Firestoreに画像URLを更新
-            await itemRef.update({ item_image: imageUrl });
-        } else {
-            console.log(`既に登録されています: ${itemName}`);
-        }
-    }
-
-    await browser.close();
+    // await browser.close();
 }
 
-// URLからパスを抽出する関数
-function extractFilePath(url) {
-    try {
-        const decodedUrl = decodeURIComponent(url); // URLデコード
-        const match = decodedUrl.match(/\/itemImage\/(.+)$/); // 必要な部分を抽出
-        return match ? `itemImage/${match[1]}` : null;
-    } catch (error) {
-        console.error('URL解析に失敗しました:', error);
-        return null;
-    }
-}
+// // URLからパスを抽出する関数
+// function extractFilePath(url) {
+//     try {
+//         const decodedUrl = decodeURIComponent(url); // URLデコード
+//         const match = decodedUrl.match(/\/itemImage\/(.+)$/); // 必要な部分を抽出
+//         return match ? `itemImage/${match[1]}` : null;
+//     } catch (error) {
+//         console.error('URL解析に失敗しました:', error);
+//         return null;
+//     }
+// }
 
-// ストレージのファイルを公開する関数
-async function makeFilePublic(filePath) {
-    const file = bucket.file(filePath);
-    await file.makePublic();
-    console.log(`File ${filePath} is now public`);
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
-    console.log(`Public URL:`, publicUrl);
-    return publicUrl;
-}
+// // ストレージのファイルを公開する関数
+// async function makeFilePublic(filePath) {
+//     const file = bucket.file(filePath);
+//     await file.makePublic();
+//     console.log(`File ${filePath} is now public`);
+//     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+//     console.log(`Public URL:`, publicUrl);
+//     return publicUrl;
+// }
 
 app.get('/api/v1/favorites', async (req, res) => {
     const { uid } = req.query; // クエリパラメータからuidを取得
@@ -250,51 +274,57 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 app.get('/api/v1/scraping', async (req, res) => {
-    getItems();
+    addProducts();
     res.send("スクレイピングを完了しました")
 })
 app.get('/api/v1/item', async (req, res) => {
-    try {
-        const itemsRef = db.collection('items');
-        const snapshot = await itemsRef.get();
-        
-        const items = await Promise.all(snapshot.docs.map(async (doc) => {
-            const data = doc.data();
-            const id = doc.id;
+    const products = await getSevenElevenProducts();
+    return res.json({ message: 'データ取得成功', products });
+    // try {
+    //     const itemsRef = db.collection('items');
+    //     const snapshot = await itemsRef.orderBy('launch_date', 'desc').get();
 
-            let formattedDate = "不明";
-            if (data.launch_date) {
-                const date = new Date(data.launch_date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
-                formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
-            }
+    //     const products = await Promise.all(snapshot.docs.map(async (doc) => {
+    //         const data = doc.data();
+    //         const id = doc.id;
 
-            let imageUrl = data.public_image_url || data.item_image;
-            if (!data.public_image_url) {
-                const filePath = extractFilePath(data.item_image);
-                if (filePath) {
-                    imageUrl = await makeFilePublic(filePath);
-                    await db.collection('items').doc(id).update({ public_image_url: imageUrl });
-                }
-            }
+    //         let formattedDate = "不明";
+    //         if (data.launch_date) {
+    //             const date = new Date(data.launch_date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
+    //             formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
+    //         }
 
-            return {
-                id,
-                name: data.name,
-                price: data.price,
-                launch: formattedDate,
-                imageUrl,
-                favorites: data.favorites,
-                regions: data.regions,
-            };
-        }));
-        return res.json({ message: 'データ取得成功', items });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('エラーが発生しました');
-    }
+    //         let imageUrl = data.public_image_url || data.item_image;
+    //         if (!data.public_image_url) {
+    //             const filePath = extractFilePath(data.item_image);
+    //             if (filePath) {
+    //                 imageUrl = await makeFilePublic(filePath);
+    //                 await db.collection('items').doc(id).update({ public_image_url: imageUrl });
+    //             }
+    //         }
+
+    //         return {
+    //             id,
+    //             name: data.name,
+    //             price: data.price,
+    //             launch: formattedDate,
+    //             imageUrl,
+    //             favorites: data.favorites,
+    //             regions: data.regions,
+    //         };
+    //     }));
+    //     return res.json({ message: 'データ取得成功', products });
+    // } catch (error) {
+    //     console.error(error);
+    //     res.status(500).send('エラーが発生しました');
+    // }
 });
 
+app.get('api/v1/lawson/home',(req,res)=>{
+
+})
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 })
+
 app.listen(PORT, () => { console.log(`http://localhost:${PORT}`) });
