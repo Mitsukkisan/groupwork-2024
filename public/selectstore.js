@@ -1,42 +1,29 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { firebaseConfig } from "./firebaseauth.js";
+
+// Firebase初期化
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 const selectStoreDOM = document.getElementById('selectStore');
 
-selectStoreDOM.addEventListener('change', (event) => {
-    const option = event.target.value;
-    const fetchProducts = async (url, queryParams = {}) => {
-        try {
-            // クエリパラメータをURLに追加
-            const queryString = new URLSearchParams(queryParams).toString();
-            const fullUrl = queryString ? `${url}?${queryString}` : url;
-
-            const response = await axios.get(fullUrl);
-            const { data: products } = response; // サーバーからのレスポンスを取得
-            console.log(products); // サーバーからのデータをコンソールに出力（デバッグ用）
-
-            // 必要に応じてDOM操作で表示
-            // displayProducts(products);
-        } catch (error) {
-            console.error("Error fetching products:", error);
-        }
-    };
-    switch (option) {
-        case "0": console.log("セブンイレブン");
-            fetchProducts('api/v1/sevenEleven/home', {
-                option: 'new', // 例: 新着商品順
-                order: 'desc', // 例: 降順
-            });
-            break;
-        case "1": console.log("ファミリーマート")
-            break
-        case "2": console.log("ローソン")
-            const getLawson = async () => {
-                try {
-                    const response = axios.get('api/v1/lawson/getProducts');
-                    const { data: { products } } = response;
-                } catch (error) {
-                    console.log(error);
-                }
+selectStoreDOM.addEventListener('change', async (event) => {
+    // ユーザーの認証状態を監視
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const uid = user.uid;    // ユーザID
+            const conveni = event.target.value; // 表示店舗名
+            try {
+                // サーバーに現在のコンビニを送信してユーザーテーブルを更新
+                const response = await axios.patch("/api/v1/update", { uid, conveni });
+                console.log('/api/v1/update',response.data); // レスポンスをコンソールに表示
+                location.reload()
+            } catch (error) {
+                console.error(error); // エラー発生時に表示
             }
-            break;
-    }
-
-})
+        } else {
+            console.log("ユーザーがログインしていません");
+        }
+    });
+});

@@ -21,34 +21,28 @@
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
   <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css" />
-  <script type="text/javascript">
-    // Firebase 設定
-    const firebaseConfig = {
-      apiKey: "AIzaSyArHbubY097iRMuvY-Dq8SwSZRpw3mhaNg",
-      authDomain: "conveni-trend.firebaseapp.com",
-      projectId: "projectId",
-      storageBucket: "conveni-trend.firebasestorage.app",
-      messagingSenderId: "968316614555",
-      appId: "1:968316614555:web:a2efa219e0586ad665933e",
-      measurementId: "G-6YY0LVQ8MZ"
-    };
-
+  <script type="module">
+    import { firebaseConfig, addUser } from './firebaseauth.js'
     // Firebase を初期化
     firebase.initializeApp(firebaseConfig);
+    // Firestore 初期化
+    const db = firebase.firestore(); // firestoreを初期化
+
     // FirebaseUI の設定
     var uiConfig = {
-      // サインインの流れはポップアップ画面
       signInFlow: 'popup',
-      // サインイン成功時の遷移先URL
-      signInSuccessUrl: './menu.html',
+      // signInSuccessUrl: './menu.html', サインイン成功時リダイレクトURL
       signInOptions: [{
-        // 使用する認証プロバイダを指定
         provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        // ボタンカラーを指定(デフォルトは白,下記#2F2F2Fはボタンをダークテーマカラーに変更できる)
-        // buttonColor:'#2F2F2F',
+      }],
+      callbacks: {
+        signInSuccessWithAuthResult: async(authResult) => {
+          await addUser(authResult)
+          return false;  //  true:リダイレクト　false:リダイレクトを防ぐ
+        },
       }
-      ],
     };
     // FirebaseUI ウィジェットを初期化
     var ui;
@@ -74,7 +68,8 @@
           <button type="submit" class="btn btn-primary text-center" id="submitSignin"><svg
               xmlns="http://www.w3.org/2000/svg" width="16" height="15" fill="currentColor" class="bi bi-send me-1"
               viewBox="0 0 16 16">
-              <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z" />
+              <path
+                d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z" />
             </svg>ログイン</button>
         </div>
         <h2 class="head-border">または</h2>
@@ -82,17 +77,17 @@
         <h2 class="head-border">ユーザー登録がお済みでない方</h2>
         <div class="text-center">
           <a href="signup.html">
-             ユーザー登録
-            </a>
+            ユーザー登録
+          </a>
         </div>
       </form>
     </div>
   </div>
   <!-- id属性がfirebaseui-auth-containerに対して認証付きボタン機能が適応される -->
   <!-- Googleでログインボタンを移動させる場合は、以下のdiv idタグを切り取ってください -->
-   <!-- axios -->
-   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-   <script type="module" src="./scraping.js"></script>
+  <!-- axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script type="module" src="./scraping.js"></script>
 </body>
 
 </html>

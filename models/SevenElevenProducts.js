@@ -1,7 +1,7 @@
 const { PassThrough } = require('stream');
 const puppeteer = require('puppeteer')
 const axios = require('axios');
-const { db, bucket, } = require('../firebaseConfig');
+const { db, bucket, } = require('../firebaseConfig.js');
 const collectionName = 'sevenEleven_products';
 const storageFolderName = 'sevenEleven_image'
 
@@ -96,7 +96,6 @@ const sevenElevenScraper = async () => {
         await browser.close();
     }
 }
-
 const addSevenElevenProducts = async () => {
     const datas = await sevenElevenScraper();
     for (const data of datas) {
@@ -151,7 +150,7 @@ const addSevenElevenProducts = async () => {
         }
     }
 }
-const getSevenElevenProducts = async (option, order, allergies) => {
+const getSevenElevenProducts = async (region,prefecture,option, order,) => {
     const collectionRef = db.collection(collectionName);
     let query = collectionRef;
 
@@ -188,9 +187,43 @@ const getSevenElevenProducts = async (option, order, allergies) => {
 
     return products;
 };
+const getFavoriteSevenElevenProducts = async(productIds,option)=>{
+    let productData = [];
+    // 各商品IDについて非同期に処理
+    for (const product_id of productIds) {
+        try {
+            const doc = await db.collection(collectionName).doc(product_id).get(); // 1つの商品を取得
+            if (doc.exists) {
+                const data = doc.data();  // ドキュメントデータを取得
+                if (data.date) {
+                    const date = new Date(data.date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
+                    formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
+                }
+                // 商品データを配列に追加
+                productData.push({
+                    id: doc.id,
+                    name: data.name,
+                    date: formattedDate,
+                    price: data.price,
+                    favorites: data.favorites,
+                    allergies: data.allergies,
+                    regions: data.regions,
+                    image: data.image,
+                });
+            } else {
+                console.log(`商品ID ${product_id} は見つかりませんでした`);
+            }
+        } catch (error) {
+            console.error(`商品ID ${product_id} の取得中にエラーが発生しました:`, error);
+        }
+    }
+    console.log(productData)
+    return productData;  // 商品データの配列を返す
+}
 
 module.exports = {
     sevenElevenScraper,
     addSevenElevenProducts,
     getSevenElevenProducts,
+    getFavoriteSevenElevenProducts
 }
