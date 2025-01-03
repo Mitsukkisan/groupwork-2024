@@ -1,24 +1,13 @@
 const puppeteer = require('puppeteer')
 const axios = require('axios');
 const { PassThrough } = require('stream');
-// const { initializeApp, applicationDefault } = require('firebase-admin/app');
-// const { getFirestore, } = require('firebase-admin/firestore');
 const { db, bucket, } = require('../firebaseConfig');
-const { Storage } = require('firebase-admin/storage')
 require('dotenv').config();
 
-// const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-// //  firebase初期化
-// const app = initializeApp({
-//     credential: applicationDefault(),
-//     storageBucket: 'conveni-trend.firebasestorage.app',
-// });
-// const db = getFirestore();
+//  firestoreのコレクション名
 const collectionName = 'lawson_products';
-// const storage = new Storage(app)
-// const bucket = storage.bucket();
+//  firestorageのフォルダ名
 const storageFolderName = 'lawson_image'
-
 //  新商品の要素
 const element = "#sec-01 > ul.col-3.heightLineParent > li"
 //  ホームページURL
@@ -80,17 +69,38 @@ const lawsonScraper = async () => {
                 ]
             )
             console.log("商品詳細ページ:", page.url());
-            const mainAllergies = await page.$$eval(
+            
+            const mainAllergies = await page.$$eval(    //  主要なアレルギー成分
                 "#sec-01 > div.rightBlock > dl > dd.allergy > div > dl > dt",
                 elements => elements.map(el => el.textContent.trim())
-            )
-            const rawOtherallergies = await page.$eval(
-                "#sec-01 > div.rightBlock > dl > dd.allergy > p",
-                elements => elements.textContent.trim()
-            )
-            const regex = /「(.+)」/;
-            const found = rawOtherallergies.match(regex);
-            const otherAllergies = found[1].split('・')
+            ) || []
+            let rawOtherallergies;  // その他のアレルギー成分
+
+            //  その他のアレルギー成分の要素が存在するか確認
+            const allergyElement = await page.$("#sec-01 > div.rightBlock > dl > dd.allergy > p");
+            if (allergyElement) {
+                rawOtherallergies = await allergyElement.evaluate(el => el.textContent.trim());
+            } else {
+                console.log("アレルギー情報が見つかりませんでした。",allergyElement);
+            }
+            const regex = /「(.+)」/;   //  正規表現
+            let found;                  //  正規表現の結果
+            let otherAllergies = []; // その他の各アレルギー成分
+            // その他のアレルギー成分が存在する場合正規表現で分解
+            if (rawOtherallergies) {
+                if(rawOtherallergies === "特定原材料8品目は含まれていません"){
+                    otherAllergies=rawOtherallergies;
+                }
+                else{
+                    found = rawOtherallergies.match(regex);
+                }
+            }
+            if (found) {
+                otherAllergies = found[1].split('・');
+            } else {
+                console.log("その他のアレルギー情報が見つかりませんでした:", rawOtherallergies);
+            }
+            console.log("その他の各アレルギー成分",otherAllergies)
             const allergies = mainAllergies.concat(otherAllergies);
             console.log("アレルギー成分:", allergies);
             // 前のページに戻る
@@ -169,8 +179,6 @@ const addLawsonProducts = async () => {
         }
     })
 }
-addLawsonProducts()
-
 const getLawsonProducts = async (option, order, allergies) => {
     const collectionRef = db.collection(collectionName);
     let query = collectionRef;
@@ -190,10 +198,14 @@ const getLawsonProducts = async (option, order, allergies) => {
     const products = snapshot.docs
         .map((doc) => {
             const data = doc.data();
+            if (data.date) {
+                const date = new Date(data.date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
+                formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
+            }
             return {
                 id: doc.id,
-                name:data.name,
-                date: data.date.toDate(),
+                name: data.name,
+                date: formattedDate,
                 price: data.price,
                 favorites: data.favorites,
                 allergies: data.allergies,
@@ -203,9 +215,45 @@ const getLawsonProducts = async (option, order, allergies) => {
 
     return products;
 };
+const getFavoriteLawsonProducts = async (productIds, option) => {
+    let productData = [];
+    // 各商品IDについて非同期に処理
+    for (const product_id of productIds) {
+        try {
+            const doc = await db.collection(collectionName).doc(product_id).get(); // 1つの商品を取得
+
+            if (doc.exists) {
+                const data = doc.data();  // ドキュメントデータを取得
+                if (data.date) {
+                    const date = new Date(data.date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
+                    formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
+                }
+                // 商品データを配列に追加
+                productData.push({
+                    id: doc.id,
+                    name: data.name,
+                    date: formattedDate,
+                    price: data.price,
+                    favorites: data.favorites,
+                    allergies: data.allergies,
+                    regions: data.regions,
+                    image: data.image,
+                });
+            } else {
+                console.log(`商品ID ${product_id} は見つかりませんでした`);
+            }
+        } catch (error) {
+            console.error(`商品ID ${product_id} の取得中にエラーが発生しました:`, error);
+        }
+    }
+    console.log(productData)
+    return productData;  // 商品データの配列を返す
+}
+
 
 module.exports = {
     lawsonScraper,
     addLawsonProducts,
-    getLawsonProducts
+    getLawsonProducts,
+    getFavoriteLawsonProducts
 }

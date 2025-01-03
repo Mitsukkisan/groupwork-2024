@@ -12,24 +12,30 @@
 </head>
 
 <body>
+  <script type="module" src="./menu.js"></script>
+  <script type="module" src="./firebaseauth.js"></script>
+  
+  <!-- axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
   <div class="d-flex align-items-center justify-content-center vh-100">
     <div class="card p-3" style="width: 30rem;">
-      <form method="get" action="home.html">
+      <form id="menu-form">
         <h2 class="text-center mb-4">コンビニトレンド</h2>
         
         <!-- コンビニ名 -->
         <div class="mb-3">
           <label class="form-label">コンビニ名</label>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="conveni" value="SevenEleven" id="checkSevenEleven" required>
+            <input class="form-check-input" type="radio" name="conveni" value="セブンイレブン" id="checkSevenEleven" required>
             <label class="form-check-label" for="checkSevenEleven">セブンイレブン</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="conveni" value="Lawson"id="checkLawson">
+            <input class="form-check-input" type="radio" name="conveni" value="ローソン"id="checkLawson">
             <label class="form-check-label" for="checkLawson">ローソン</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="conveni" value="FamilyMart" id="checkFamilyMart">
+            <input class="form-check-input" type="radio" name="conveni" value="ファミリーマート" id="checkFamilyMart">
             <label class="form-check-label" for="checkFamilyMart">ファミリーマート</label>
           </div>
         </div>
@@ -63,7 +69,7 @@
         
         <!-- 決定ボタン -->
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary">決定</button>
+          <button type="submit"class="btn btn-primary" id="submitMenu">決定</button>
         </div>
       </form>
     </div>

@@ -23,13 +23,13 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">ホーム</a>
+                        <a class="nav-link active" id="home" href="#">ホーム</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="./favorites.html">お気に入り</a>
+                        <a class="nav-link active" id="favorites" href="./favorites.html">お気に入り</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="./ranking.html">ランキング</a>
+                        <a class="nav-link active" id="ranking" href="./ranking.html">ランキング</a>
                     </li>
                     <li class="nav-item">
                         <select class="form-select me-2" aria-label="selectOrder">
@@ -39,9 +39,9 @@
                           </select>
                     <li class="nav-item">
                         <select class="form-select me-2" id="selectStore">
-                            <option value="0"selected >表示店舗：セブンイレブン</option>
-                            <option value="1">表示店舗：ファミリーマート</option>
-                            <option value="2">表示店舗：ローソン</option>
+                            <option value="セブンイレブン"selected >表示店舗：セブンイレブン</option>
+                            <option value="ファミリーマート">表示店舗：ファミリーマート</option>
+                            <option value="ローソン">表示店舗：ローソン</option>
                         </select>
                     </li>
                 </ul>
@@ -54,24 +54,21 @@
                         </svg>
                     </div>
                 <br><button type="submit" class="btn btn-primary text-center" id="submitLogout">ログアウト</button></br>
-                    
             </div>
         </div>
     </nav>
     <div class="container">
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2" id="itemRow">
-
         </div>
     </div>
     <script src="itemcard.js"></script>
+    <!-- bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
-
     <!-- axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script type="module" src="./script.js"></script>
+    <script type="module" src="./home.js"></script>
     <script type="module" src="./selectstore.js"></script>
 </body>
-
 </html>

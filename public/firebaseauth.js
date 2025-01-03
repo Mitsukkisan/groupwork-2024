@@ -1,9 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getFirestore, setDoc, doc,updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // Firebase設定
-const firebaseConfig = {
+export const firebaseConfig = {
     apiKey: "AIzaSyArHbubY097iRMuvY-Dq8SwSZRpw3mhaNg",
     authDomain: "conveni-trend.firebaseapp.com",
     projectId: "conveni-trend",
@@ -81,7 +81,6 @@ if (document.getElementById('username')) {
     const usernameDOM = document.getElementById('username');
     onAuthStateChanged(auth, (user) => {
         if (user) {
-
             const uid = user.displayName || "ゲスト";
             usernameDOM.innerHTML = uid;
         } else {
@@ -103,5 +102,57 @@ if (document.getElementById('submitLogout')) {
 
     })
 }
+//  Googleログインユーザ登録
+export const addUser = async(authResult) => {
+    const uid = authResult.user.uid;    //  ユーザーID
+    const db = getFirestore();
+    const userData = {
+        email: authResult.user.email,
+        name: authResult.user.displayName,
+    };
+    const docRef = doc(db, "users", uid);
+    // 既存のフィールドを更新
+    await setDoc(docRef, userData)
+        .then(() => {
+            console.log("ユーザー情報が更新されました");
+            window.location.href="./menu.html"
+        })
+        .catch((error) => {
+            console.error("ユーザー情報の更新に失敗しました:", error);
+        });
+}
+//  利用コンビニ、住まいの地域登録
+if (document.getElementById('menu-form')) {
+    const submitMenuDOM = document.getElementById('submitMenu');
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            submitMenuDOM.addEventListener('click', async(event) => {
+                event.preventDefault();
+                const conveni = document.querySelector('input[name="conveni"]:checked').value;
+                // 地域名の選択値を取得
+                const region = document.getElementById('region').value;
+                // 都道府県名の選択値を取得
+                const prefecture = document.getElementById('prefecture').value;
+                try {
+                    const response  = await axios.post('/api/v1/menu', {
+                        uid: uid,
+                        conveni: conveni,
+                        region: region,
+                        prefecture: prefecture
+                    })
+                    console.log(response.data);
+                    window.location.href='./home.html';
+                } catch (error) {
+                    console.log(error);
+                }
+                
+            })
 
+        }
+        else {
+            console.log("ユーザID取得に失敗しました");
+        }
+    })
+}
 
