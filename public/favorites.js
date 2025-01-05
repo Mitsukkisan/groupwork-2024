@@ -7,6 +7,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const itemsDOM = document.getElementById('itemRow');
 const selectStoreDOM = document.getElementById('selectStore');
+const selectOrderDOM = document.getElementById('selectOrder');
 
 // 商品表示関数
 export const getFavorites = async () => {
@@ -15,8 +16,9 @@ export const getFavorites = async () => {
             const uid = user.uid; // ユーザーIDを取得
             console.log(`ログインユーザーID: ${uid}`);
             const response = await axios.get(`/api/v1/favorites?uid=${uid}`);
-            const { data: { productData,conveni,productIds } } = response; //  商品データ,お気に入り商品配列,利用コンビニ
+            const { data: { productData,conveni,productIds,option,order } } = response; //  商品データ,お気に入り商品配列,利用コンビニ
             console.log("getFavorites 利用コンビニ名", conveni)
+            let sortOption; //  並び替え
             // conveniに基づいてselectの値を設定
             if (conveni) {
                 // conveniに一致するoptionにselectedを追加
@@ -25,6 +27,27 @@ export const getFavorites = async () => {
                     if (option.value === conveni) {
                         option.selected = true;
                     }
+                }
+            }
+            //  並び替えオプションをチェック
+            if(option === 'date'){
+                sortOption = '新着商品'
+            }
+            else if(option === 'price'){
+                if(order === 'asc'){
+                    sortOption = '安い順'
+                }
+                else{
+                    sortOption = '高い順'
+                }
+            }
+            console.log("現在の並び替えオプション",sortOption);
+            // conveniに基づいてselectの値を設定
+             // 並び替えオプションを設定
+             if (sortOption) {
+                const options = selectOrderDOM.options;
+                for (let opt of options) {
+                    opt.selected = (opt.value === sortOption);
                 }
             }
             // 商品カードを生成

@@ -1,6 +1,6 @@
 /* ページ全体の背景色とフォント設定 */
 body {
-    background-color: #dbcc23; /* 背景色を淡い青色に */
+    background-color: #FFCC99; /* 背景色を淡い青色に */
     margin: 0; /* ページ全体の余白をリセット */
     font-family: Arial, sans-serif; /* 読みやすいサンセリフフォントを指定 */
 }
@@ -35,8 +35,6 @@ body {
     width: 100%; /* 親要素の幅いっぱいに設定 */
     
 }
-
-
 
 /* 商品画像のスタイル */
 .product-img {
