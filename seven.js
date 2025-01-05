@@ -87,24 +87,25 @@ app.get('/api/v1/favorites', async (req, res) => {
     const order = await getOrder(uid);                             //  並び替え順
     console.log(products);
     const favorites = getFavoritesFromProducts(products);   //  お気に入りコレクション名
+    let productIds; //  お気に入り商品ID
+    let productData;   //  表示する商品データ
     //  ユーザがお気に入りした商品IDを取得
     querySnapshots = await db.collection(favorites).where('user_id', '==', uid).get();
     //  お気に入り商品が存在しない場合
     if (querySnapshots.empty) {
         console.log("お気に入り商品が見つかりません");
-        res.status(200).json([]); // 空配列を返す
-        return;
     }
-    const productIds = querySnapshots.docs.map(snapshot => snapshot.data().product_id); //  お気に入りした商品ID
-    console.log("商品IDの配列", productIds)
-    let productData;   //  表示する商品データ
-    switch (products) {
-        case sevenElevenProducts:
-            productData = await getFavoriteSevenElevenProducts(productIds, option, order)
-            break;
-        case lawsonProducts:
-            productData = await getFavoriteLawsonProducts(productIds, option, order);
-            break;
+    else {
+        productIds = querySnapshots.docs.map(snapshot => snapshot.data().product_id); //  お気に入りした商品ID
+        console.log("商品IDの配列", productIds)
+        switch (products) {
+            case sevenElevenProducts:
+                productData = await getFavoriteSevenElevenProducts(productIds, option, order)
+                break;
+            case lawsonProducts:
+                productData = await getFavoriteLawsonProducts(productIds, option, order);
+                break;
+        }
     }
     return res.json({ message: 'データ取得成功', productData, productIds, conveni, option, order });
 })

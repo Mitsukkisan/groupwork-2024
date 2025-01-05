@@ -14,9 +14,9 @@ export const getFavorites = async () => {
     onAuthStateChanged(auth, async (user) => {
         try {
             const uid = user.uid; // ユーザーIDを取得
-            console.log(`ログインユーザーID: ${uid}`);
+            console.log(`getFavorites ログインユーザーID: ${uid}`);
             const response = await axios.get(`/api/v1/favorites?uid=${uid}`);
-            const { data: { productData,conveni,productIds,option,order } } = response; //  商品データ,お気に入り商品配列,利用コンビニ
+            const { data: { productData, conveni, productIds, option, order } } = response; //  商品データ,お気に入り商品配列,利用コンビニ
             console.log("getFavorites 利用コンビニ名", conveni)
             let sortOption; //  並び替え
             // conveniに基づいてselectの値を設定
@@ -30,30 +30,31 @@ export const getFavorites = async () => {
                 }
             }
             //  並び替えオプションをチェック
-            if(option === 'date'){
+            if (option === 'date') {
                 sortOption = '新着商品'
             }
-            else if(option === 'price'){
-                if(order === 'asc'){
+            else if (option === 'price') {
+                if (order === 'asc') {
                     sortOption = '安い順'
                 }
-                else{
+                else {
                     sortOption = '高い順'
                 }
             }
-            console.log("現在の並び替えオプション",sortOption);
+            console.log("getFavorites 現在の並び替えオプション", sortOption);
             // conveniに基づいてselectの値を設定
-             // 並び替えオプションを設定
-             if (sortOption) {
+            // 並び替えオプションを設定
+            if (sortOption) {
                 const options = selectOrderDOM.options;
                 for (let opt of options) {
                     opt.selected = (opt.value === sortOption);
                 }
             }
-            // 商品カードを生成
-            const productCard = productData.map(product => {
-                const { id, name, price, date, image, regions, allergies } = product;
-                return `<div class="col">
+            if (productData!=undefined) {
+                // 商品カードを生成
+                const productCard = productData.map(product => {
+                    const { id, name, price, date, image, regions, allergies } = product;
+                    return `<div class="col">
                     <div class="card">
                         <img class="card-img-top" src="${image}" alt="商品画像">
                         <div class="card-body">
@@ -73,8 +74,9 @@ export const getFavorites = async () => {
                         </div>
                     </div>
                 </div>`;
-            }).join("");
-            itemsDOM.innerHTML = productCard; // 商品カードをDOMに挿入
+                }).join("");
+                itemsDOM.innerHTML = productCard; // 商品カードをDOMに挿入
+            }
             console.log("お気に入り配列", productIds);
             //  商品カードを表示する際にお気に入り商品のボタンをお気に入り済みに変更
             if (productIds != undefined) {
@@ -102,7 +104,7 @@ export const getFavorites = async () => {
                         const response = await axios.post('/api/v1/favorites', { uid, product_id });
                         console.log(response.data)
                         window.alert("お気に入り登録に成功しました")
-                        await getFavorites();
+                        location.reload()
                     }
                     else {
                         const response = await axios.delete('/api/v1/favorites', {
@@ -110,7 +112,7 @@ export const getFavorites = async () => {
                         });
                         console.log(response.data)
                         window.alert("お気に入り解除に成功しました")
-                        await getFavorites();
+                        location.reload()
                     }
                 });
             });
