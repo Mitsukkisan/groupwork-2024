@@ -112,14 +112,15 @@ export const addUser = async(authResult) => {
     };
     const docRef = doc(db, "users", uid);
     // 既存のフィールドを更新
-    await setDoc(docRef, userData)
+    try {
+        await setDoc(docRef, userData)
         .then(() => {
             console.log("ユーザー情報が更新されました");
             window.location.href="./menu.html"
         })
-        .catch((error) => {
-            console.error("ユーザー情報の更新に失敗しました:", error);
-        });
+    } catch (error) {
+        console.log(error);
+    }
 }
 //  利用コンビニ、住まいの地域登録
 if (document.getElementById('menu-form')) {
