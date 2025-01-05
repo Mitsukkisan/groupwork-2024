@@ -31,11 +31,11 @@
                         <a class="nav-link active" id="ranking" href="./ranking.html">ランキング</a>
                     </li>
                     <li class="nav-item">
-                        <select class="form-select me-2" aria-label="selectOrder">
-                            <option value="0" selected>並び替え：新着商品</option>
-                            <option value="1">価格：安い順</option>
-                            <option value="2">価格：高い順</option>
-                        </select>
+                        <select class="form-select me-2" id="selectOrder">
+                            <option value="新着商品" selected>並び替え：新着商品</option>
+                            <option value="安い順">価格：安い順</option>
+                            <option value="高い順">価格：高い順</option>
+                          </select>
                     <li class="nav-item">
                         <select class="form-select me-2" id="selectStore">
                             <option value="セブンイレブン" selected>表示店舗：セブンイレブン</option>
@@ -74,6 +74,7 @@
     <script type="module" src="./favorites.js"></script>
     <script type="module" src="./firebaseauth.js"></script>
     <script type="module" src="./selectstore.js"></script>
+    <script type="module" src="./selectorder.js"></script>
 </body>
 
 </html>

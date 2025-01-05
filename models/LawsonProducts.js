@@ -179,22 +179,11 @@ const addLawsonProducts = async () => {
         }
     })
 }
-const getLawsonProducts = async (option, order, allergies) => {
+const getLawsonProducts = async (option, order) => {
     const collectionRef = db.collection(collectionName);
     let query = collectionRef;
-
-    // 新着商品順
-    if (option === "new") {
-        query = query.orderBy('date', 'desc');
-    } else if (option === "price") {
-        if (order === "high") {
-            query = query.orderBy('price', 'desc');
-        } else {
-            query = query.orderBy('price', 'asc');
-        }
-    }
     // クエリを実行
-    const snapshot = await query.get();
+    const snapshot = await query.orderBy(option,order).get();
     const products = snapshot.docs
         .map((doc) => {
             const data = doc.data();
@@ -215,37 +204,32 @@ const getLawsonProducts = async (option, order, allergies) => {
 
     return products;
 };
-const getFavoriteLawsonProducts = async (productIds, option) => {
+const getFavoriteLawsonProducts = async (productIds, option,order) => {
+    console.log('getFavoriteLawsonProducts option',option);
+    console.log('getFavoriteLawsonProducts order',order);
     let productData = [];
     // 各商品IDについて非同期に処理
-    for (const product_id of productIds) {
-        try {
-            const doc = await db.collection(collectionName).doc(product_id).get(); // 1つの商品を取得
 
-            if (doc.exists) {
-                const data = doc.data();  // ドキュメントデータを取得
-                if (data.date) {
-                    const date = new Date(data.date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
-                    formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
-                }
-                // 商品データを配列に追加
-                productData.push({
-                    id: doc.id,
-                    name: data.name,
-                    date: formattedDate,
-                    price: data.price,
-                    favorites: data.favorites,
-                    allergies: data.allergies,
-                    regions: data.regions,
-                    image: data.image,
-                });
-            } else {
-                console.log(`商品ID ${product_id} は見つかりませんでした`);
+    let querySnapshots = await db.collection(collectionName).where('__name__', 'in', productIds)
+    .orderBy(option,order).get(); // 指定したIDでフィルタリング
+    productData = querySnapshots.docs
+        .map((doc) => {
+            const data = doc.data();
+            if (data.date) {
+                const date = new Date(data.date._seconds * 1000);    //  TIMESTAMP型をDate型に変換
+                formattedDate = `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, '0')}月${String(date.getDate()).padStart(2, '0')}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
             }
-        } catch (error) {
-            console.error(`商品ID ${product_id} の取得中にエラーが発生しました:`, error);
-        }
-    }
+            return {
+                id: doc.id,
+                name: data.name,
+                date: formattedDate,
+                price: data.price,
+                favorites: data.favorites,
+                allergies: data.allergies,
+                regions: data.regions,
+                image: data.image,
+            };
+        })
     console.log(productData)
     return productData;  // 商品データの配列を返す
 }

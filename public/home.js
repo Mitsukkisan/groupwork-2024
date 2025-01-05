@@ -6,7 +6,9 @@ import { firebaseConfig } from "./firebaseauth.js";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const itemsDOM = document.getElementById('itemRow');
-const selectStoreDOM = document.getElementById('selectStore');
+const selectStoreDOM = document.getElementById('selectStore');  //  表示店舗DOM
+const selectOrderDOM = document.getElementById('selectOrder');  //  並び替えDOM
+
 
 // 商品表示関数
 export const getProducts = async () => {
@@ -15,8 +17,12 @@ export const getProducts = async () => {
             const uid = user.uid; // ユーザーIDを取得
             console.log(`ログインユーザーID: ${uid}`);
             const response = await axios.get(`/api/v1/home?uid=${uid}`);
-            const { data: { productsDatas, productIds, conveni } } = response; //  商品データ,お気に入り商品配列,利用コンビニ
+            const { data: { productsDatas, productIds, conveni,option,order} } = response; //  商品データ,お気に入り商品配列,利用コンビニ
+            let sortOption; //  並び替え
             console.log("利用コンビニ", conveni)
+            console.log('getProducts option',option);
+            console.log('getProducts order',order);
+
             // conveniに基づいてselectの値を設定
             if (conveni) {
                 // conveniに一致するoptionにselectedを追加
@@ -25,6 +31,27 @@ export const getProducts = async () => {
                     if (option.value === conveni) {
                         option.selected = true;
                     }
+                }
+            }
+            //  並び替えオプションをチェック
+            if(option === 'date'){
+                sortOption = '新着商品'
+            }
+            else if(option === 'price'){
+                if(order === 'asc'){
+                    sortOption = '安い順'
+                }
+                else{
+                    sortOption = '高い順'
+                }
+            }
+            console.log("現在の並び替えオプション",sortOption);
+            // conveniに基づいてselectの値を設定
+             // 並び替えオプションを設定
+             if (sortOption) {
+                const options = selectOrderDOM.options;
+                for (let opt of options) {
+                    opt.selected = (opt.value === sortOption);
                 }
             }
             // 商品カードを生成
