@@ -36,7 +36,7 @@ const getRanking = async () => {
 
             // 商品カードを生成
             const productCard = productDatas.map((product, index) => {
-                const { id, name, price, date, image, regions, allergies,favorites } = product;
+                const { id, name, price, date, image, regions, allergies,favorites,category } = product;
                 return `<div class="col">
                 <div class="card">
                     <div class="image-wrapper">
@@ -45,6 +45,7 @@ const getRanking = async () => {
                     </div>
                     <div class="card-body">
                         <h6 class="card-title">${name}</h6>
+                        ${category ? `<p class="card-text">商品カテゴリー：${category}</p>` : ''}
                         <p class="card-text">販売価格:${price}円(税込み)</p>
                         <p class="card-text">${date}以降順次発売</p>
                         ${regions ? `<p class="card-text">販売地域：${regions}</p>` : ''}

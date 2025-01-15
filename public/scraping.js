@@ -10,7 +10,7 @@ const isTuesDay = () => {
 
 const sevenScraping = async () => {
     const day = isTuesDay();
-    // //  火曜日の場合スクレイピングを行う
+    //  火曜日の場合スクレイピングを行う
     // try {
     //     if (day) {
     //         const response = await axios.get('/api/v1/scraping');
