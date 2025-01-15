@@ -1,8 +1,9 @@
 const express = require('express');
 const PORT = process.env.PORT || 5000;
 const { firebaseApp, db, bucket } = require('./firebaseConfig');
-const { sevenElevenScraper, addSevenElevenProducts, getSevenElevenProducts, getFavoriteSevenElevenProducts } = require('./models/SevenElevenProducts');
-const { lawsonScraper, addLawsonProducts, getLawsonProducts, getFavoriteLawsonProducts } = require('./models/LawsonProducts');
+const {  addSevenElevenProducts, getSevenElevenProducts, getFavoriteSevenElevenProducts } = require('./models/SevenElevenProducts');
+const {  addLawsonProducts, getLawsonProducts, getFavoriteLawsonProducts } = require('./models/LawsonProducts');
+const {addFamilyMartProducts,getFamilyMartProducts,getFavoriteFamilyMartProducts,}=require('./models/FamilyMartProducts');
 const { FieldValue } = require('firebase-admin/firestore');
 const admin = require('firebase-admin');
 const auth = admin.auth();
@@ -17,8 +18,9 @@ require('dotenv').config();
 const sevenElevenProducts = "sevenEleven_products"      //  セブンイレブン商品コレクション名
 const sevenElevenFavorites = "sevenEleven_favorites";   //  セブンイレブンお気に入りコレクション名
 const lawsonProducts = "lawson_products"                 //  ローソン商品コレクション名
-const lawsonFavorites = "lawson_favorites";             //  ローソンお気に入りコレクション名
-
+const lawsonFavorites = "lawson_favorites"                //  ローソンお気に入りコレクション名
+const familyMartProducts = "familymart_products"        //  ファミリーマート商品コレクション名
+const familyMartFavorites = "familymart_favorites"      //  ファミリーマートお気に入りコレクション名
 const region = 'region'             //  地域フィールド名
 const prefecture = 'prefecture';    //  県名フィールド名
 
@@ -34,6 +36,7 @@ const getUserInfo = async (uid, key) => {
 const collections = {
     "セブンイレブン": sevenElevenProducts,
     "ローソン": lawsonProducts,
+    "ファミリーマート":familyMartProducts,
 };
 //  利用コンビニ名を取得
 const getConveni = async (uid) => getUserInfo(uid, 'conveni');
@@ -55,9 +58,11 @@ const getPrefecture = async (uid) => getUserInfo(uid, prefecture);
 const getFavoritesFromProducts = (products) => {
     switch (products) {
         case sevenElevenProducts:
-            return sevenElevenFavorites   //  セブンイレブンの商品コレクション名
+            return sevenElevenFavorites   //  セブンイレブンのお気に入りコレクション名
         case lawsonProducts:
-            return lawsonFavorites  //  ローソンの商品コレクション名
+            return lawsonFavorites      //  ローソンのお気に入りコレクション名
+        case familyMartProducts: 
+            return familyMartFavorites  //  ファミリーマートのお気に入りコレクション名
     }
 }
 
@@ -65,14 +70,17 @@ const getFavoritesFromProducts = (products) => {
 const getFavoritesFromConveni = (conveni) => {
     switch (conveni) {
         case "セブンイレブン":
-            return sevenElevenFavorites   //  セブンイレブンの商品コレクション名
+            return sevenElevenFavorites   //  セブンイレブンのお気に入りコレクション名
         case "ローソン":
-            return lawsonFavorites  //  ローソンの商品コレクション名
+            return lawsonFavorites      //  ローソンのお気に入りコレクション名
+        case "ファミリーマート":
+            return familyMartFavorites  //  ファミリーマートのお気に入りコレクション名
     }
 }
 
 //  スクレイピングメソッド
 async function addProducts() {
+    addFamilyMartProducts()
     addSevenElevenProducts();
     addLawsonProducts();
 }
@@ -104,6 +112,9 @@ app.get('/api/v1/favorites', async (req, res) => {
                 break;
             case lawsonProducts:
                 productData = await getFavoriteLawsonProducts(productIds, option, order);
+                break;
+            case familyMartProducts:
+                productData = await getFavoriteFamilyMartProducts(productIds, option, order);
                 break;
         }
     }
@@ -142,6 +153,7 @@ app.get('/api/v1/ranking', async (req, res) => {
             productDatas.push({
                 id: ProductDocSnapshot.id,
                 name: data.name,
+                category:data.category,
                 date: formattedDate,
                 price: data.price,
                 favorites: data.favorites,
@@ -224,6 +236,8 @@ app.get('/api/v1/home', async (req, res) => {
         case "ローソン":
             productsDatas = await getLawsonProducts(option, order);
             break;
+        case"ファミリーマート":
+            productsDatas = await getFamilyMartProducts(region,option,order);
     }
     return res.json({ message: 'データ取得成功', productsDatas, productIds, conveni, option, order });
 });

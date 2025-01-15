@@ -56,7 +56,7 @@ const lawsonScraper = async () => {
 
             const priceElementHandle = await data.$('p.price > span:nth-child(1)');
             const rawPrice = await priceElementHandle.evaluate(el => el.textContent.trim());
-            const taxedPrice = rawPrice.replace('円', '').trim();
+            const taxedPrice = rawPrice.replace(/(各|円|\(税込\))/g, '').trim();
             //  商品価格
             const price = parseInt(taxedPrice, 10);
             console.log(price, "円(税込み)");
@@ -69,6 +69,7 @@ const lawsonScraper = async () => {
                 ]
             )
             console.log("商品詳細ページ:", page.url());
+            
             
             const mainAllergies = await page.$$eval(    //  主要なアレルギー成分
                 "#sec-01 > div.rightBlock > dl > dd.allergy > div > dl > dt",
