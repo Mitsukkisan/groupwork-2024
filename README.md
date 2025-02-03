@@ -30,4 +30,39 @@
 | Bootstrap            | 5.3.0      |
 | Node.js              | 20.18.0    |
 
-## ディレクトリ構成
+## 動作環境
+以下の環境で動作確認済みです  
+使用エディター VSCode  
+推奨ブラウザ Google Chrome  
+npm 10.8.2  
+Node.js 20.18.0 , 20.18.2  
+Node.jsをインストールされていない方はこちらから↓  
+https://nodejs.org/ja/download
+
+## 開発環境構築
+※当該アプリでは、テキストエディタ―にVSCodeを使用しています。
+
+## 使用コマンド
+| Command | Description |
+|---------|------------|
+| `git clone https://github.com/Mitsukkisan/groupwork-2024.git` | リポジトリをクローン |
+| `cd groupwork-2024` | クローンしたリポジトリに移動 |
+| `npm install` | 必要な依存関係をインストール |
+| `npm run dev` | 開発プログラムの実行 |
+
+# リポジトリをクローン
+`git clone https://github.com/Mitsukkisan/groupwork-2024.git`
+# リポジトリに移動
+git bashにて `cd groupwork-2024`
+# 依存関係をインストール
+`npm install`
+# .env作成
+リポジトリ直下に.envファイルを作成して下さい。環境変数はリポジトリ直下.env.exampleファイルに記載の通りです。
+# 開発プログラムの実行
+`npm run dev`
+# 開発プログラムの停止
+Ctrl + C
+
+
+
+
