@@ -149,7 +149,6 @@ if (document.getElementById('menu-form')) {
                 }
                 
             })
-
         }
         else {
             console.log("ユーザID取得に失敗しました");

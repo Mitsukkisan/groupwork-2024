@@ -13,7 +13,7 @@ const homePage = "https://www.family.co.jp/goods/newgoods.html"
 
 const familyMartScraper = async () => {
     //  テスト時はheadless:falseで実行
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     //  新商品配列
     const newProducts = [];
     try {
@@ -153,6 +153,7 @@ const familyMartScraper = async () => {
         await browser.close();
     }
 }
+
 const categories = {
     'おむすび': 'omusubi.png',
     'お弁当': 'obento.png',
@@ -276,6 +277,7 @@ const getFavoriteFamilyMartProducts = async(productIds,option,order)=>{
     console.log(productData)
     return productData;  // 商品データの配列を返す
 }
+
 module.exports={
     addFamilyMartProducts,
     familyMartScraper,
