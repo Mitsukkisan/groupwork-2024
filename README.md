@@ -56,8 +56,10 @@ https://nodejs.org/ja/download
 git bashにて `cd groupwork-2024`
 # 依存関係をインストール
 `npm install`
-# .env作成
-リポジトリ直下に.envファイルを作成して下さい。環境変数はリポジトリ直下.env.exampleファイルに記載の通りです。
+# .env 作成
+リポジトリ直下に、添付された.envファイルをそのままコピーして貼り付けてください
+# conveni-trend-firebase-adminsdk-ou4j8-b8dc1e348c.json 作成
+リポジトリ直下に、添付された.jsonファイルをそのままコピーして貼り付けてください
 # 開発プログラムの実行
 `npm run dev`
 # 開発プログラムの停止
