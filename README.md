@@ -58,8 +58,10 @@ git bashにて `cd groupwork-2024`
 `npm install`
 # .env 作成
 リポジトリ直下に、添付された.envファイルをそのままコピーして貼り付けてください
-# conveni-trend-firebase-adminsdk-ou4j8-b8dc1e348c.json 作成
+# conveni-trend-firebase-adminsdk-ou4j8-8189cd71cd.json 作成
 リポジトリ直下に、添付された.jsonファイルをそのままコピーして貼り付けてください
+# firebaseauth.jsの編集
+publicフォルダ内のfirebaseauth.js6行目の{}内に、添付された.txtファイルの内容をコピーしてください。
 # 開発プログラムの実行
 `npm run dev`
 # 開発プログラムの停止
