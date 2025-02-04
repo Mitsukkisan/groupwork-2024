@@ -4,13 +4,6 @@ import { getFirestore, setDoc, doc,updateDoc } from "https://www.gstatic.com/fir
 
 // Firebase設定
 export const firebaseConfig = {
-    apiKey: "AIzaSyArHbubY097iRMuvY-Dq8SwSZRpw3mhaNg",
-    authDomain: "conveni-trend.firebaseapp.com",
-    projectId: "conveni-trend",
-    storageBucket: "conveni-trend.firebasestorage.app",
-    messagingSenderId: "968316614555",
-    appId: "1:968316614555:web:a2efa219e0586ad665933e",
-    measurementId: "G-6YY0LVQ8MZ"
 };
 
 // Firebase初期化
