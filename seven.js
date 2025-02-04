@@ -80,11 +80,11 @@ const getFavoritesFromConveni = (conveni) => {
 
 //  スクレイピングメソッド
 async function addProducts() {
+    addLawsonProducts();
     addFamilyMartProducts()
     addSevenElevenProducts();
-    addLawsonProducts();
+    
 }
-
 
 // お気に入り商品表示
 app.get('/api/v1/favorites', async (req, res) => {
